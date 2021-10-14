@@ -2,94 +2,134 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
 	"io"
-	"io/ioutil"
-	"os"
-	"strings"
+	"sync"
+	"time"
 )
 
-const baseURL = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/"
+const baseURL = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/"
 
 func main() {
-	contentProvince := get(baseURL)
-
-	doc, err := html.Parse(strings.NewReader(string(contentProvince)))
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	matcher := matchByClass("class", "provincetr")
-
-	var dataWithHtml []string
-	nodes := TraverseNode(doc, matcher)
-	for _, node := range nodes {
-		dataWithHtml = append(dataWithHtml, renderNode(node))
-	}
-
-	matcherA := matcherByAtom(atom.A)
-
-	var provinceList []Division
-
-	for _, str := range dataWithHtml {
-		doc2, _ := html.Parse(strings.NewReader(str))
-		nodes2 := TraverseNode(doc2, matcherA)
-		for _, node := range nodes2 {
-			url := node.Attr[0].Val
-			code := url[:len(url)-5]
-			if len(code) < 12 {
-				b := strings.Builder{}
-				b.WriteString(code)
-				for i := 0; i < 12-len(code); i++ {
-					b.WriteString("0")
-				}
-				code = b.String()
-			}
-			provinceList = append(provinceList, Division{
-				Url:   url,
-				Code:  code,
-				Level: 1,
-				Name:  node.FirstChild.Data,
-			})
-		}
-	}
-	fmt.Println(provinceList)
+	start := time.Now().UnixNano() / 1e6
+	//yearList := CrawlYear()
+	//fmt.Println(yearList)
+	//latestYear := yearList[0]
 	//写入文件
 	dir := "./file"
-	err = MkDir(dir)
+	err := MkDir(dir)
 	if err != nil {
 		panic("创建失败")
 		return
 	}
-	marshal, err := json.Marshal(provinceList)
-	if err != nil {
-		return
+	//version := map[string]interface{}{
+	//	"URL":         baseURL,
+	//	"CreateAt":    BeijingTime().Unix(),
+	//	"CreateAtStr": BeijingTime().Format("2006-01-02T15-04-05+08:00"),
+	//	"Year":        TimeStrToTime(latestYear.Year + "-01-01").Unix(),
+	//	"YearStr":     latestYear.Year,
+	//	"Version":     latestYear.UpdatedAt,
+	//	"VersionStr":  StampToTime(latestYear.UpdatedAt).Format("2006-01-02T15-04-05+08:00"),
+	//}
+
+	provinceList := CrawlProvince("2020")
+	fmt.Println("province:", len(provinceList))
+	fmt.Println(provinceList)
+
+	//地级市
+	var cityList []Division
+	//for _, province := range provinceList {
+	//	tempList := CrawlCity(province, latestYear.Year)
+	//	for _, division := range tempList {
+	//		cityList = append(cityList, division)
+	//	}
+	//}
+	ch := make(chan Division, 100)
+	var wg sync.WaitGroup
+
+	for i, division := range provinceList {
+		wg.Add(1)
+
+		go func(ch chan Division, dd Division, i int) {
+			defer wg.Done()
+			CrawlCity(ch, dd, "2020")
+		}(ch, division, i)
 	}
-	//生成json文件
-	err = ioutil.WriteFile(dir+"/province.json", marshal, os.ModeDir)
-	if err != nil {
-		panic("写入失败"+err.Error())
+	end := make(chan int)
+	go func() {
+		wg.Wait()
+		end <- 1
+	}()
+
+L:
+	for {
+		select {
+		case data := <-ch:
+
+			cityList = append(cityList, data)
+		case <-end:
+			break L
+		}
+
 	}
 
-	for _, province := range provinceList {
-		if province.Code != "530000000000" {
-			continue
-		}
-		cityList := CrawlCity(province)
-		for _, city := range cityList {
-			countyList := CrawlCounty(city)
-			for _, county := range countyList {
-				townList := CrawlTown(county)
-				for _, _ = range townList {
-					//villageList := CrawlVillage(town)
-					//fmt.Println(villageList)
-				}
-			}
-		}
-	}
+	fmt.Println("city:", len(cityList))
+	fmt.Println(cityList)
+	//1s
+
+	//县级市
+	//var countyList []Division
+	//for _, city := range cityList {
+	//	tempList := CrawlCounty(city, latestYear.Year)
+	//	for _, division := range tempList {
+	//		countyList = append(countyList, division)
+	//	}
+	//}
+	//fmt.Println("county:", len(countyList))
+	//2990
+	//5s
+
+	////镇、街道
+	//var townList []Division
+	//for _, county := range countyList {
+	//	tempList := CrawlTown(county, latestYear.Year)
+	//	for _, division := range tempList {
+	//		townList = append(townList, division)
+	//	}
+	//}
+	//fmt.Println("town:", len(townList))
+	//
+	////村级
+	//var villageList []Division
+	//for _, town := range townList {
+	//	tempList := CrawlTown(town, latestYear.Year)
+	//	for _, division := range tempList {
+	//		villageList = append(villageList, division)
+	//	}
+	//}
+	//fmt.Println("village:", len(villageList))
+
+	//for _, province := range provinceList {
+	//	cityList := CrawlCity(province)
+	//	for _, city := range cityList {
+	//		countyList := CrawlCounty(city)
+	//		for _, county := range countyList {
+	//			townList := CrawlTown(county)
+	//			for _, _ = range townList {
+	//				//villageList := CrawlVillage(town)
+	//				//fmt.Println(villageList)
+	//			}
+	//		}
+	//	}
+	//}
+
+	endTime := time.Now().UnixNano() / 1e6
+	fmt.Println("crawl done,cost:", endTime-start, "ms")
+
+	//写入
+	//WriteToJsonFile(dir, "version.json", version)
+	//WriteToJsonFile(dir, "province.json", provinceList)
 
 }
 

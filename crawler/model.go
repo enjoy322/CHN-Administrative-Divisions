@@ -1,5 +1,10 @@
 package main
 
+type DivisionYear struct {
+	Year      string
+	UpdatedAt int64
+}
+
 type Division struct {
 	Url          string
 	Code         string

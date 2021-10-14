@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 )
-
 
 // 目录是否存在
 func IsExistDir(dirPath string) (bool, error) {
@@ -39,4 +39,26 @@ func MkDir(dirPath string) error {
 	}
 
 	return nil
+}
+
+//写入文件
+
+func WriteToJsonFile(dir string, name string, data interface{}) {
+	file, err := os.OpenFile(dir+"/"+name, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0766)
+	if err != nil {
+		panic("[error] 打开文件" + dir + "/" + name + "失败")
+	}
+	_, err = file.Write(toJson(data))
+	if err != nil {
+		panic("[error]写入文件" + dir + "/" + name + "失败")
+	}
+}
+
+//解析成json
+func toJson(data interface{}) []byte {
+	marshal, err := json.Marshal(data)
+	if err != nil {
+		panic("[error] 解析失败")
+	}
+	return marshal
 }
