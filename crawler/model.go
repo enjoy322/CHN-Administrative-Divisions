@@ -1,12 +1,15 @@
 package main
 
 type DivisionYear struct {
-	Year      string
-	UpdatedAt int64
+	Year       int64
+	YearStr    string
+	UpdatedStr string
+	UpdatedAt  int64
 }
 
 type Division struct {
 	Url          string
+	SimpleCode   string
 	Code         string
 	Name         string
 	TownCode     string

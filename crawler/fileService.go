@@ -24,21 +24,19 @@ func IsExistDir(dirPath string) (bool, error) {
 }
 
 // 创建文件夹
-func MkDir(dirPath string) error {
+func MkDir(dirPath string) {
 	exist, err := IsExistDir(dirPath)
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 	if exist {
-		return nil
+		panic("已存在")
 	}
 
 	err = os.MkdirAll(dirPath, os.ModePerm)
 	if err != nil {
-		return errors.New("目录创建失败：" + err.Error())
+		panic(errors.New("目录创建失败：" + err.Error()))
 	}
-
-	return nil
 }
 
 //写入文件
