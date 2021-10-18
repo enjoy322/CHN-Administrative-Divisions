@@ -1,6 +1,7 @@
-package main
+package crawler
 
 import (
+	"CHN-Administrative-Divisions/model"
 	"bytes"
 	"fmt"
 	"golang.org/x/net/html"
@@ -10,8 +11,8 @@ import (
 )
 
 //返回统计局提供的年份信息
-func DealYear(doc *html.Node) []DivisionYear {
-	var l []DivisionYear
+func DealYear(doc *html.Node) []model.DivisionYear {
+	var l []model.DivisionYear
 	matcherCity := matchByClass("class", "cont_tit")
 	nodes := TraverseNode(doc, matcherCity)
 	for _, node := range nodes {
@@ -22,7 +23,7 @@ func DealYear(doc *html.Node) []DivisionYear {
 		nodesUpdatedAt := TraverseNode(docContent, matcherUpdatedAt)
 		year := nodesYear[0].FirstChild.Data
 		updatedAt := nodesUpdatedAt[0].FirstChild.Data
-		l = append(l, DivisionYear{
+		l = append(l, model.DivisionYear{
 			YearStr:    year[:4] + "-01-01",
 			Year:       TimeStrToTime(year[:4] + "-01-01").Unix(),
 			UpdatedStr: updatedAt,
@@ -34,7 +35,7 @@ func DealYear(doc *html.Node) []DivisionYear {
 
 //版本信息 写入
 
-func Version() {
+func WriteVersion() {
 	//version := map[string]interface{}{
 	//	"URL":         baseURL,
 	//	"CreateAt":    BeijingTime().Unix(),
@@ -48,8 +49,8 @@ func Version() {
 }
 
 ////省份
-func DealProvince(doc *html.Node) []Division {
-	var dList []Division
+func DealProvince(doc *html.Node) []model.Division {
+	var dList []model.Division
 	matcherCity := matchByClass("class", "provincetr")
 	nodes := TraverseNode(doc, matcherCity)
 	for _, node := range nodes {
@@ -73,7 +74,7 @@ func DealProvince(doc *html.Node) []Division {
 				}
 				code = b.String()
 			}
-			dList = append(dList, Division{
+			dList = append(dList, model.Division{
 				Url:        url,
 				SimpleCode: simpleCode,
 				Code:       code,
@@ -87,28 +88,72 @@ func DealProvince(doc *html.Node) []Division {
 }
 
 //地级市
-func DealCity(ch chan Division, doc *html.Node, division Division) {
-	var cityList []Division
-
-	matcherCity := matchByClass("class", "citytr")
-	nodeCity := TraverseNode(doc, matcherCity)
-	for _, node := range nodeCity {
+func DealCity(doc *html.Node, division model.Division) []model.Division {
+	var tempList []model.Division
+	matcher := matchByClass("class", "citytr")
+	nodes := TraverseNode(doc, matcher)
+	for _, node := range nodes {
 		tempUrl := node.FirstChild.FirstChild.Attr[0].Val
 		code := node.FirstChild.FirstChild.FirstChild.Data
 		name := node.LastChild.FirstChild.FirstChild.Data
-		var d = Division{
+		var d = model.Division{
 			Url:          tempUrl,
 			Code:         code,
+			SimpleCode:   code[:4],
 			Name:         name,
 			Level:        2,
 			ProvinceCode: division.Code,
 		}
-		ch <- d
-		cityList = append(cityList, d)
+		tempList = append(tempList, d)
 	}
-	//fmt.Println(division.Name)
-	//fmt.Println("crawl:",len(cityList))
-	//fmt.Println( cityList)
+	return tempList
+}
+
+func DealCounty(ch chan model.Division, doc *html.Node, division model.Division) []model.Division {
+	//s:=time.Now().UnixNano()
+	var ll []model.Division
+	matcher := matchByClass("class", "countytr")
+	nodes := TraverseNode(doc, matcher)
+	for _, node := range nodes {
+		if node.FirstChild.FirstChild.Data != "a" {
+			//市辖区（不再分
+			//fmt.Println("continue")
+			//continue
+			code := node.FirstChild.FirstChild.Data
+			name := node.LastChild.FirstChild.Data
+			var d = model.Division{
+				Code:         code,
+				SimpleCode:   code[:6],
+				Name:         name,
+				Level:        3,
+				CityCode:     division.Code,
+				ProvinceCode: division.ProvinceCode,
+			}
+			//ch <- d
+			ll = append(ll, d)
+
+		} else {
+			tempUrl := node.FirstChild.FirstChild.Attr[0].Val
+			code := node.FirstChild.FirstChild.FirstChild.Data
+			name := node.LastChild.FirstChild.FirstChild.Data
+			var d = model.Division{
+				Url:          code[:2] + "/" + tempUrl,
+				Code:         code,
+				SimpleCode:   code,
+				Name:         name,
+				Level:        3,
+				CityCode:     division.Code,
+				ProvinceCode: division.ProvinceCode,
+			}
+			//ch <- d
+			ll = append(ll, d)
+		}
+		//e1:=time.Now().UnixNano()
+		//fmt.Println("处理单次：",e1-s)
+	}
+	//e2:=time.Now().UnixNano()
+	//fmt.Println("处理单次全部：",e2-s)
+	return ll
 }
 
 ////县级市

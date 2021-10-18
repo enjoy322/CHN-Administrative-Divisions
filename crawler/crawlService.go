@@ -1,10 +1,10 @@
-package main
+package crawler
 
 import (
+	"CHN-Administrative-Divisions/model"
 	"fmt"
 	"golang.org/x/net/html"
 	"strings"
-	"time"
 )
 
 func CrawlYear(url string) *html.Node {
@@ -22,8 +22,7 @@ func CrawlProvince(url string, yearStr string) *html.Node {
 	return doc
 }
 
-//省份
-func CrawlCity(url string, yearStr string, division Division) *html.Node {
+func CrawlCity(url string, yearStr string, division model.Division) *html.Node {
 	builder := strings.Builder{}
 	builder.WriteString(url)
 	builder.WriteString(yearStr)
@@ -34,15 +33,28 @@ func CrawlCity(url string, yearStr string, division Division) *html.Node {
 	return doc
 }
 
+func CrawlCounty(url string, yearStr string, division model.Division) *html.Node {
+	builder := strings.Builder{}
+	builder.WriteString(url)
+	builder.WriteString(yearStr)
+	builder.WriteString("/")
+	builder.WriteString(division.Url)
+	//http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/53/5301.html
+	doc := crawl(builder.String())
+	return doc
+}
+
 //爬取页面
 func crawl(url string) *html.Node {
 	content, _, f := DoRequest(url)
 	if !f {
+		fmt.Println("crawl 请求失败", url)
+		return nil
 		//	本次请求失败
-		timer1 := time.NewTimer(time.Second * 3)
-		<-timer1.C //阻塞，3秒以后重新执行
-		fmt.Println("重新执行")
-		CrawlYear(url)
+		//timer1 := time.NewTimer(time.Second*5)
+		//<-timer1.C
+		//fmt.Println("重新执行",url)
+		//CrawlYear(url)
 	}
 
 	doc, err := html.Parse(content)

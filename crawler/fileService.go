@@ -1,7 +1,6 @@
-package main
+package crawler
 
 import (
-	"encoding/json"
 	"errors"
 	"os"
 )
@@ -37,26 +36,4 @@ func MkDir(dirPath string) {
 	if err != nil {
 		panic(errors.New("目录创建失败：" + err.Error()))
 	}
-}
-
-//写入文件
-
-func WriteToJsonFile(dir string, name string, data interface{}) {
-	file, err := os.OpenFile(dir+"/"+name, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0766)
-	if err != nil {
-		panic("[error] 打开文件" + dir + "/" + name + "失败")
-	}
-	_, err = file.Write(toJson(data))
-	if err != nil {
-		panic("[error]写入文件" + dir + "/" + name + "失败")
-	}
-}
-
-//解析成json
-func toJson(data interface{}) []byte {
-	marshal, err := json.Marshal(data)
-	if err != nil {
-		panic("[error] 解析失败")
-	}
-	return marshal
 }

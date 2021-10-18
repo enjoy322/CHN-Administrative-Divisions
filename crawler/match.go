@@ -1,4 +1,4 @@
-package main
+package crawler
 
 import (
 	"golang.org/x/net/html"
@@ -19,7 +19,7 @@ func matcherByAtom(param atom.Atom) func(node *html.Node) (keep bool, exit bool)
 	return matcher
 }
 
-func matchByClass(findAttrKey string,findAttrVal string) func(node *html.Node) (keep bool, exit bool) {
+func matchByClass(findAttrKey string, findAttrVal string) func(node *html.Node) (keep bool, exit bool) {
 	matcher := func(node *html.Node) (keep bool, exit bool) {
 		if node.Type == html.ElementNode {
 			var s string

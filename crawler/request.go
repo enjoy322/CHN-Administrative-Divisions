@@ -1,4 +1,4 @@
-package main
+package crawler
 
 import (
 	"bytes"
@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+const BaseURL = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/"
+
 func DoRequest(url string) (io.Reader, error, bool) {
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", url, nil)
@@ -16,6 +18,7 @@ func DoRequest(url string) (io.Reader, error, bool) {
 		fmt.Println("[error] 请求失败" + err.Error())
 		return nil, err, false
 	}
+	request.Header.Set("allower_redirection", "False")
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
@@ -25,6 +28,11 @@ func DoRequest(url string) (io.Reader, error, bool) {
 		return nil, err, false
 	}
 	if response.StatusCode != 200 {
+		//fmt.Println(response.Cookies())
+		//uu := response.Header.Get("Location")
+		//fmt.Println(uu)
+		//body, _ := ioutil.ReadAll(response.Body)
+		//fmt.Println(string(body))
 		return nil, nil, false
 	}
 
