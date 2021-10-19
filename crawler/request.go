@@ -15,7 +15,7 @@ func DoRequest(url string) (io.Reader, error, bool) {
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("[error] 请求失败" + err.Error())
+		fmt.Println("[error] 请求失败1" + err.Error())
 		return nil, err, false
 	}
 	request.Header.Set("allower_redirection", "False")
@@ -24,7 +24,7 @@ func DoRequest(url string) (io.Reader, error, bool) {
 	}
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println("[error] 请求失败" + err.Error())
+		fmt.Println("[error] 请求失败2" + err.Error())
 		return nil, err, false
 	}
 	if response.StatusCode != 200 {

@@ -2,7 +2,6 @@ package crawler
 
 import (
 	"CHN-Administrative-Divisions/model"
-	"fmt"
 	"golang.org/x/net/html"
 	"strings"
 )
@@ -44,11 +43,32 @@ func CrawlCounty(url string, yearStr string, division model.Division) *html.Node
 	return doc
 }
 
+func CrawlTown(url string, yearStr string, division model.Division) *html.Node {
+	builder := strings.Builder{}
+	builder.WriteString(url)
+	builder.WriteString(yearStr)
+	builder.WriteString("/")
+	builder.WriteString(division.Url)
+	//fmt.Println(builder.String())
+	doc := crawl(builder.String())
+	return doc
+}
+
+func CrawlVillage(url string, yearStr string, division model.Division) *html.Node {
+	builder := strings.Builder{}
+	builder.WriteString(url)
+	builder.WriteString(yearStr)
+	builder.WriteString("/")
+	builder.WriteString(division.Url)
+	//fmt.Println(builder.String())
+	doc := crawl(builder.String())
+	return doc
+}
+
 //爬取页面
 func crawl(url string) *html.Node {
 	content, _, f := DoRequest(url)
 	if !f {
-		fmt.Println("crawl 请求失败", url)
 		return nil
 		//	本次请求失败
 		//timer1 := time.NewTimer(time.Second*5)

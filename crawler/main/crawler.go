@@ -89,14 +89,7 @@ func main() {
 			//	不存在，不用爬取
 		} else {
 			//	检查fail 中有误爬取city失败
-			urlList := service.CheckFail(model.FailCrawlCity)
-			fmt.Println(urlList)
-			if len(urlList) < 0 {
-				//	无错误，不怕取
-			} else {
-				//	需要爬取未爬取的
 
-			}
 		}
 	}
 

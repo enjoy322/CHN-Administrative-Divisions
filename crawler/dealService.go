@@ -109,9 +109,8 @@ func DealCity(doc *html.Node, division model.Division) []model.Division {
 	return tempList
 }
 
-func DealCounty(ch chan model.Division, doc *html.Node, division model.Division) []model.Division {
-	//s:=time.Now().UnixNano()
-	var ll []model.Division
+func DealCounty(doc *html.Node, division model.Division) []model.Division {
+	var data []model.Division
 	matcher := matchByClass("class", "countytr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
@@ -130,7 +129,7 @@ func DealCounty(ch chan model.Division, doc *html.Node, division model.Division)
 				ProvinceCode: division.ProvinceCode,
 			}
 			//ch <- d
-			ll = append(ll, d)
+			data = append(data, d)
 
 		} else {
 			tempUrl := node.FirstChild.FirstChild.Attr[0].Val
@@ -139,117 +138,66 @@ func DealCounty(ch chan model.Division, doc *html.Node, division model.Division)
 			var d = model.Division{
 				Url:          code[:2] + "/" + tempUrl,
 				Code:         code,
-				SimpleCode:   code,
+				SimpleCode:   code[:6],
 				Name:         name,
 				Level:        3,
 				CityCode:     division.Code,
 				ProvinceCode: division.ProvinceCode,
 			}
-			//ch <- d
-			ll = append(ll, d)
+			data = append(data, d)
 		}
-		//e1:=time.Now().UnixNano()
-		//fmt.Println("处理单次：",e1-s)
 	}
-	//e2:=time.Now().UnixNano()
-	//fmt.Println("处理单次全部：",e2-s)
-	return ll
+	return data
 }
 
-////县级市
-//func DealCounty(division Division, year string) []Division {
-//	var divisionList []Division
-//	url := baseURL + year + "/" + division.Url
-//	content := DoRequest(url)
-//	//匹配
-//	docCity, errCity := html.Parse(strings.NewReader(string(content)))
-//	if errCity != nil {
-//		fmt.Println(errCity)
-//		return nil
-//	}
-//	matcher := matchByClass("class", "countytr")
-//	nodeCity := TraverseNode(docCity, matcher)
-//	for _, node := range nodeCity {
-//		if node.FirstChild.FirstChild.Data != "a" {
-//			continue
-//		}
-//		tempUrl := node.FirstChild.FirstChild.Attr[0].Val
-//		code := node.FirstChild.FirstChild.FirstChild.Data
-//		name := node.LastChild.FirstChild.FirstChild.Data
-//		divisionList = append(divisionList, Division{
-//			Url:          code[:2] + "/" + tempUrl,
-//			Code:         code,
-//			Name:         name,
-//			Level:        3,
-//			CityCode:     division.Code,
-//			ProvinceCode: division.ProvinceCode,
-//		})
-//	}
-//	return divisionList
-//}
-//
-////镇、街道
-//func DealTown(division Division, year string) []Division {
-//	var divisionList []Division
-//	url := baseURL + year + "/" + division.Url
-//	content := DoRequest(url)
-//	//fmt.Println(string(content))
-//	//匹配
-//	docCity, errCity := html.Parse(strings.NewReader(string(content)))
-//	if errCity != nil {
-//		fmt.Println(errCity)
-//		return nil
-//	}
-//	matcher := matchByClass("class", "towntr")
-//	nodeCity := TraverseNode(docCity, matcher)
-//	for _, node := range nodeCity {
-//		tempUrl := node.FirstChild.FirstChild.Attr[0].Val
-//		code := node.FirstChild.FirstChild.FirstChild.Data
-//		name := node.LastChild.FirstChild.FirstChild.Data
-//		divisionList = append(divisionList, Division{
-//			Url:          code[:2] + "/" + code[2:4] + "/" + tempUrl,
-//			Code:         code,
-//			Name:         name,
-//			Level:        4,
-//			CountyCode:   division.Code,
-//			CityCode:     division.CityCode,
-//			ProvinceCode: division.ProvinceCode,
-//		})
-//	}
-//	return divisionList
-//}
-//
-////村级
-//func DealVillage(division Division) []Division {
-//	var divisionList []Division
-//	url := baseURL + division.Url
-//	content := DoRequest(url)
-//	//匹配
-//	docCity, errCity := html.Parse(strings.NewReader(string(content)))
-//	if errCity != nil {
-//		fmt.Println(errCity)
-//		return nil
-//	}
-//	matcher := matchByClass("class", "villagetr")
-//	nodeCity := TraverseNode(docCity, matcher)
-//	for _, node := range nodeCity {
-//		code := node.FirstChild.FirstChild.Data
-//		name := node.LastChild.FirstChild.Data
-//		divisionList = append(divisionList, Division{
-//			Url:          "",
-//			Code:         code,
-//			Name:         name,
-//			Level:        5,
-//			TownCode:     division.Code,
-//			CountyCode:   division.CountyCode,
-//			CityCode:     division.CityCode,
-//			ProvinceCode: division.ProvinceCode,
-//		})
-//	}
-//	return divisionList
-//}
-//
-////
+func DealTown(doc *html.Node, division model.Division) []model.Division {
+	var data []model.Division
+	matcher := matchByClass("class", "towntr")
+	nodes := TraverseNode(doc, matcher)
+	for _, node := range nodes {
+		tempUrl := node.FirstChild.FirstChild.Attr[0].Val
+		code := node.FirstChild.FirstChild.FirstChild.Data
+		name := node.LastChild.FirstChild.FirstChild.Data
+		var d = model.Division{
+			Url:          code[:2] + "/" + code[2:4] + "/" + tempUrl,
+			Code:         code,
+			SimpleCode:   code[:9],
+			Name:         name,
+			Level:        4,
+			CountyCode:   division.Code,
+			CityCode:     division.CityCode,
+			ProvinceCode: division.ProvinceCode,
+		}
+		data = append(data, d)
+	}
+	return data
+}
+
+func DealVillage(doc *html.Node, division model.Division) []model.Division {
+	var data []model.Division
+	matcher := matchByClass("class", "villagetr")
+	nodes := TraverseNode(doc, matcher)
+	for _, node := range nodes {
+		code := node.FirstChild.FirstChild.Data
+		vType := node.FirstChild.NextSibling.FirstChild.Data
+		name := node.LastChild.FirstChild.Data
+		var d = model.Division{
+			Url:          "",
+			Code:         code,
+			SimpleCode:   code,
+			Name:         name,
+			VillageType:  vType,
+			Level:        5,
+			TownCode:     division.Code,
+			CountyCode:   division.CountyCode,
+			CityCode:     division.CityCode,
+			ProvinceCode: division.ProvinceCode,
+		}
+		data = append(data, d)
+	}
+	return data
+}
+
 // TraverseNode 收集与给定功能匹配的节点
 func TraverseNode(doc *html.Node, matcher func(node *html.Node) (bool, bool)) (nodes []*html.Node) {
 	var keep, exit bool

@@ -12,6 +12,7 @@ type Division struct {
 	SimpleCode   string
 	Code         string
 	Name         string
+	VillageType  string
 	TownCode     string
 	CountyCode   string
 	CityCode     string
@@ -33,8 +34,10 @@ type Version struct {
 }
 
 type Fail struct {
-	Type      int
-	Divisions []Division
+	City    []Division
+	County  []Division
+	Town    []Division
+	Village []Division
 }
 
 const CodeFailCrawlCity = 1
