@@ -75,12 +75,13 @@ func DealProvince(doc *html.Node) []model.Division {
 				code = b.String()
 			}
 			dList = append(dList, model.Division{
-				Url:        url,
-				SimpleCode: simpleCode,
-				Code:       code,
-				Level:      model.CodeProvince,
-				Name:       provinceInfo.FirstChild.Data,
-				FullName:   provinceInfo.FirstChild.Data,
+				//Url:        url,
+				//SimpleCode: simpleCode,
+				Code:         code,
+				Level:        model.CodeProvince,
+				ProvinceCode: code,
+				Name:         provinceInfo.FirstChild.Data,
+				//FullName:   provinceInfo.FirstChild.Data,
 			})
 		}
 	}
@@ -93,17 +94,15 @@ func DealCity(doc *html.Node, division model.Division) []model.Division {
 	matcher := matchByClass("class", "citytr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
-		tempUrl := node.FirstChild.FirstChild.Attr[0].Val
+		//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
 		code := node.FirstChild.FirstChild.FirstChild.Data
 		name := node.LastChild.FirstChild.FirstChild.Data
 		var d = model.Division{
-			Url:          tempUrl,
 			Code:         code,
-			SimpleCode:   code[:4],
 			Name:         name,
-			FullName:     division.Name + "/" + name,
 			Level:        model.CodeCity,
 			ProvinceCode: division.Code,
+			CityCode:     code,
 		}
 		tempList = append(tempList, d)
 	}
@@ -120,26 +119,23 @@ func DealCounty(doc *html.Node, division model.Division) []model.Division {
 			name := node.LastChild.FirstChild.Data
 			var d = model.Division{
 				Code:         code,
-				SimpleCode:   code[:6],
 				Name:         name,
-				FullName:     division.FullName + "/" + name,
 				Level:        model.CodeCounty,
+				CountyCode:   code,
 				CityCode:     division.Code,
 				ProvinceCode: division.ProvinceCode,
 			}
 			data = append(data, d)
 
 		} else {
-			tempUrl := node.FirstChild.FirstChild.Attr[0].Val
+			//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
 			code := node.FirstChild.FirstChild.FirstChild.Data
 			name := node.LastChild.FirstChild.FirstChild.Data
 			var d = model.Division{
-				Url:          code[:2] + "/" + tempUrl,
 				Code:         code,
-				SimpleCode:   code[:6],
 				Name:         name,
-				FullName:     division.FullName + "/" + name,
 				Level:        model.CodeCounty,
+				CountyCode:   code,
 				CityCode:     division.Code,
 				ProvinceCode: division.ProvinceCode,
 			}
@@ -154,16 +150,14 @@ func DealTown(doc *html.Node, division model.Division) []model.Division {
 	matcher := matchByClass("class", "towntr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
-		tempUrl := node.FirstChild.FirstChild.Attr[0].Val
+		//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
 		code := node.FirstChild.FirstChild.FirstChild.Data
 		name := node.LastChild.FirstChild.FirstChild.Data
 		var d = model.Division{
-			Url:          code[:2] + "/" + code[2:4] + "/" + tempUrl,
 			Code:         code,
-			SimpleCode:   code[:9],
 			Name:         name,
-			FullName:     division.FullName + "/" + name,
 			Level:        model.CodeTown,
+			TownCode:     code,
 			CountyCode:   division.Code,
 			CityCode:     division.CityCode,
 			ProvinceCode: division.ProvinceCode,
@@ -179,15 +173,11 @@ func DealVillage(doc *html.Node, division model.Division) []model.Division {
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		code := node.FirstChild.FirstChild.Data
-		vType := node.FirstChild.NextSibling.FirstChild.Data
+		//vType := node.FirstChild.NextSibling.FirstChild.Data
 		name := node.LastChild.FirstChild.Data
 		var d = model.Division{
-			Url:          "",
 			Code:         code,
-			SimpleCode:   code,
 			Name:         name,
-			FullName:     division.FullName + "/" + name,
-			VillageType:  vType,
 			Level:        model.CodeVillage,
 			TownCode:     division.Code,
 			CountyCode:   division.CountyCode,

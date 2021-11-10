@@ -60,3 +60,20 @@ func toJson(data interface{}) []byte {
 	}
 	return marshal
 }
+
+func FileIsExisted(filename string) bool {
+	existed := true
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		existed = false
+	}
+	return existed
+}
+
+func FileRemove(filename string) {
+	err := os.Remove(filename)
+	if err != nil {
+		// 删除失败
+	} else {
+		// 删除成功
+	}
+}

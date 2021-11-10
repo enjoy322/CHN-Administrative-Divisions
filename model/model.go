@@ -8,17 +8,24 @@ type DivisionYear struct {
 }
 
 type Division struct {
-	Url          string
-	SimpleCode   string
 	Code         string
 	Name         string
-	VillageType  string
 	TownCode     string
 	CountyCode   string
 	CityCode     string
 	ProvinceCode string
 
-	FullName string
+	Level uint8
+}
+
+type DivisionTree struct {
+	Code         string
+	Name         string
+	TownCode     string
+	CountyCode   string
+	CityCode     string
+	ProvinceCode string
+
 	Level    uint8
 	Children []Division
 }
@@ -31,13 +38,6 @@ type Version struct {
 	VersionStr  string
 	Year        int
 	YearStr     string
-}
-
-type Fail struct {
-	City    []Division
-	County  []Division
-	Town    []Division
-	Village []Division
 }
 
 const CodeProvince = 1
