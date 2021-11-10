@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"time"
 )
 
@@ -145,52 +144,40 @@ func CCounty() {
 	//	获取所有city
 	upList := service.ListCity()
 
-	fails := service.CheckFail()
-
 	existsDivision, err := service.PathExists("./file/county.json")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	var newFail model.Fail
-	var total float64 = 3271
-	var hasTotal float64 = 0
+	var bar process.Bar
 	if !existsDivision {
 		//	不存在 直接爬取
 		fmt.Println("//不存在 直接爬取 county")
 		var finalList []model.Division
+		var failTimes = 0
+		bar.NewOption(0, int64(len(upList)))
+		var done = 0
 		for _, division := range upList {
 			//单线程
+			time.Sleep(time.Millisecond * 50)
 			doc := crawler.CrawlCounty(crawler.BaseURL, Latest, division)
 			if doc == nil {
-				newFail.County = append(newFail.County, division)
+				time.Sleep(time.Millisecond * 200)
+				failTimes++
+				if failTimes > 10 {
+					break
+				}
 				continue
 			}
 			tempList := crawler.DealCounty(doc, division)
-			hasTotal += float64(len(tempList))
-			percent := hasTotal / total * 100
-			percentStr := strconv.FormatFloat(percent, 'E', 2, 64)
-			percentJson, _ := json.Marshal(map[string]string{"County": percentStr + "%"})
-			_ = ioutil.WriteFile("./file/crawlProcess.json", percentJson, 0755)
+			done++
+			bar.Play(int64(done))
+			fmt.Printf("---fail:---%d", failTimes)
 			for _, m := range tempList {
 				finalList = append(finalList, m)
 			}
 
 		}
-
-		//处理fail.json 文件
-		if len(newFail.County) < 1 {
-			//无失败
-			fails.County = fails.County[0:0]
-			//	写入json
-			fs, _ := json.Marshal(fails)
-			_ = ioutil.WriteFile("./file/fail.json", fs, 0755)
-		} else {
-			//	有失败
-			fails.County = newFail.County
-			//	写入json
-			fs, _ := json.Marshal(fails)
-			_ = ioutil.WriteFile("./file/fail.json", fs, 0755)
-		}
+		bar.Finish()
 
 		//	city 写入
 		dataJson, _ := json.Marshal(finalList)
@@ -198,68 +185,80 @@ func CCounty() {
 		_ = ioutil.WriteFile("./file/county.json", dataJson, 0755)
 
 	} else {
-		//检查fail.json
-		fmt.Println("//存在 检查fail")
-		failList := fails.County
-		fmt.Println("FailList:", failList)
-		if len(failList) < 1 {
-			fmt.Println("//无错误，不爬取")
-			//	无错误，不怕取
-		} else {
-			fmt.Println("爬取未爬取的")
-			//	需要爬取未爬取的
-			var old []model.Division
-			// 读取文件中的数据,保存为map格式
-			data, _ := ioutil.ReadFile("./file/county.json")
-			err := json.Unmarshal(data, &old)
-			if err != nil {
-				log.Fatal(err)
+		fmt.Println("爬取未爬取的")
+		//	需要爬取未爬取的
+		var old []model.Division
+		// 读取文件
+		service.Read("./file/county.json", &old)
+		//old去重
+		var result []model.Division
+		tempMap := map[string]model.Division{} // 存放不重复主键
+		for _, e := range old {
+			l := len(tempMap)
+			tempMap[e.CityCode] = e
+			if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
+				result = append(result, e)
 			}
-			var newList []model.Division
-			//var failList []model.Fail
-			//var newFail []model.Division
-			for _, s := range failList {
-				doc := crawler.CrawlCounty(crawler.BaseURL, Latest, s)
-				if doc == nil {
-					newFail.County = append(newFail.County, s)
-					continue
-				}
-				tempList := crawler.DealCounty(doc, s)
-				for _, m := range tempList {
-					newList = append(newList, m)
-				}
-			}
-			//处理fail.json 文件
-			if len(newFail.County) < 1 {
-				//无失败
-				fails.County = fails.County[0:0]
-				//	写入json
-				fs, _ := json.Marshal(fails)
-				_ = ioutil.WriteFile("./file/fail.json", fs, 0755)
-			} else {
-				//	有失败
-				fails.County = newFail.County
-				//	写入json
-				fs, _ := json.Marshal(fails)
-				_ = ioutil.WriteFile("./file/fail.json", fs, 0755)
-			}
-
-			fmt.Println("old：", len(old))
-			fmt.Println("new：", len(newList))
-			//重新写入
-			if len(newList) > 0 {
-				//	新内容
-				fmt.Println("newList:", newList)
-				for _, division := range newList {
-					old = append(old, division)
-				}
-				fmt.Println("count:", len(old))
-			}
-
-			// 写入文件
-			out, _ := json.Marshal(old)
-			_ = ioutil.WriteFile("./file/county.json", out, 0755)
 		}
+		var needCrawl []model.Division
+		ss := time.Now().UnixNano() / 1e6
+		var doneCrawl = 0
+		for _, division := range upList {
+			f := true
+			for _, done := range result {
+				if done.CityCode == division.Code {
+					f = false
+					doneCrawl++
+				}
+
+			}
+			if f {
+				needCrawl = append(needCrawl, division)
+			}
+		}
+		fmt.Println("need crawl deal cost:", time.Now().UnixNano()/1e6-ss, "ms")
+
+		var newList []model.Division
+		var failTimes = 0
+		fmt.Println("need:", needCrawl)
+		bar.NewOption(int64(doneCrawl), int64(len(upList)))
+		var done = 0
+		for _, s := range needCrawl {
+			doc := crawler.CrawlCounty(crawler.BaseURL, Latest, s)
+			time.Sleep(time.Millisecond * 50)
+			if doc == nil {
+				time.Sleep(time.Millisecond * 200)
+				failTimes++
+				if failTimes > 10 {
+					break
+				}
+				continue
+			}
+			tempList := crawler.DealCounty(doc, s)
+			done++
+			//bar.Play(int64(doneCrawl + done))
+			//fmt.Printf("---fail:---%d", failTimes)
+			for _, m := range tempList {
+				newList = append(newList, m)
+			}
+		}
+		bar.Finish()
+
+		fmt.Println("old：", len(old))
+		fmt.Println("new：", len(newList))
+		//重新写入
+		if len(newList) > 0 {
+			//	新内容
+			fmt.Println("newList:", newList)
+			for _, division := range newList {
+				old = append(old, division)
+			}
+			fmt.Println("count:", len(old))
+		}
+
+		// 写入文件
+		out, _ := json.Marshal(old)
+		_ = ioutil.WriteFile("./file/county.json", out, 0755)
 	}
 	fmt.Println("-----------------county----------------")
 }
@@ -281,7 +280,7 @@ func CTown() {
 		var finalList []model.Division
 		bar.NewOption(0, int64(len(upList)))
 		var i = 0
-		var failI = 0
+		var failTimes = 0
 		for _, division := range upList {
 			if division.Url == "" {
 				continue
@@ -291,14 +290,15 @@ func CTown() {
 			time.Sleep(time.Millisecond * 100)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 500)
-				failI++
-				if failI > 10 {
+				failTimes++
+				if failTimes > 10 {
 					break
 				}
 				continue
 			}
 			i++
 			bar.Play(int64(i))
+			fmt.Printf("---fail:---%d", failTimes)
 			tempList := crawler.DealTown(doc, division)
 			for _, m := range tempList {
 				finalList = append(finalList, m)
@@ -317,12 +317,24 @@ func CTown() {
 		var old []model.Division
 		// 读取文件
 		service.Read("./file/town.json", &old)
+
+		//old去重
+		var result []model.Division
+		tempMap := map[string]model.Division{} // 存放不重复主键
+		for _, e := range old {
+			l := len(tempMap)
+			tempMap[e.CountyCode] = e
+			if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
+				result = append(result, e)
+			}
+		}
+
 		var needCrawl []model.Division
 		ss := time.Now().UnixNano() / 1e6
 		var doneCrawl = 0
 		for _, division := range upList {
 			f := true
-			for _, done := range old {
+			for _, done := range result {
 				if done.CountyCode == division.Code {
 					f = false
 					doneCrawl++
@@ -336,7 +348,7 @@ func CTown() {
 		fmt.Println("need crawl deal cost:", time.Now().UnixNano()/1e6-ss, "ms")
 
 		var newList []model.Division
-		var failI = 0
+		var failTimes = 0
 		bar.NewOption(int64(len(old)), int64(len(upList)))
 		var j = 0
 		for _, s := range needCrawl {
@@ -347,14 +359,15 @@ func CTown() {
 			time.Sleep(time.Millisecond * 100)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 500)
-				failI++
-				if failI > 10 {
+				failTimes++
+				if failTimes > 10 {
 					break
 				}
 				continue
 			}
 			j++
 			bar.Play(int64(doneCrawl + j))
+			fmt.Printf("---fail:---%d", failTimes)
 			tempList := crawler.DealTown(doc, s)
 
 			for _, m := range tempList {
@@ -404,11 +417,11 @@ func CVillage() {
 		for _, division := range upList {
 			//单线程
 			doc := crawler.CrawlVillage(crawler.BaseURL, Latest, division)
-			//time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 20)
 			if doc == nil {
-				time.Sleep(time.Millisecond * 300)
+				time.Sleep(time.Millisecond * 50)
 				failTimes++
-				if failTimes > 10 {
+				if failTimes > 5 {
 					break
 				}
 				continue
@@ -440,20 +453,30 @@ func CVillage() {
 		//从保存的village中提取已经爬取得城镇
 		var needCrawlTown []model.Division
 		ss := time.Now().UnixNano() / 1e6
-		fmt.Println(ss-s1, "ms")
+		fmt.Println("读取json:", ss-s1, "ms")
+
+		//old去重
+		var result []model.Division
+		tempMap := map[string]model.Division{} // 存放不重复主键
+		for _, e := range old {
+			l := len(tempMap)
+			tempMap[e.TownCode] = e
+			if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
+				result = append(result, e)
+			}
+		}
+		s3 := time.Now().UnixNano() / 1e6
+		fmt.Println("unique:", s3-ss, "ms")
+
+		fmt.Println("result:", len(result))
+		fmt.Println("old:", len(old))
 
 		for _, division := range upList {
-			f := true
-			for _, done := range old {
-				if done.TownCode == division.Code {
-					f = false
-				}
-
-			}
-			if f {
+			if _, ok := tempMap[division.Code]; !ok {
 				needCrawlTown = append(needCrawlTown, division)
 			}
 		}
+
 		all := len(upList)
 		need := len(needCrawlTown)
 		fmt.Println("need crawl deal cost:", time.Now().UnixNano()/1e6-ss, "ms")
@@ -464,12 +487,12 @@ func CVillage() {
 		var j = 0
 		fmt.Println("needCrawlTown:", len(needCrawlTown))
 		for _, s := range needCrawlTown {
-			time.Sleep(time.Millisecond * 50)
 			doc := crawler.CrawlVillage(crawler.BaseURL, Latest, s)
+			time.Sleep(time.Millisecond * 20)
 			if doc == nil {
-				time.Sleep(time.Millisecond * 200)
+				time.Sleep(time.Millisecond * 50)
 				failTimes++
-				if failTimes > 2 {
+				if failTimes > 10 {
 					break
 				}
 				continue

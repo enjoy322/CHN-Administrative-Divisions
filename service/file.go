@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	"io/ioutil"
 	"os"
 )
@@ -14,10 +15,17 @@ func Read(file string, data interface{}) {
 	}
 
 	// 1.2 json解析公共库配置
-	err = json.Unmarshal(f, &data)
+	//err = json.Unmarshal(f, &data)
+	//if err != nil {
+	//	panic("[error] 项目配置文件，无法解析成预期的格式")
+	//}
+
+	var json2 = jsoniter.ConfigCompatibleWithStandardLibrary
+	err = json2.Unmarshal(f, &data)
 	if err != nil {
-		panic("[error] 项目配置文件，无法解析成预期的格式")
+		return
 	}
+
 }
 
 func PathExists(path string) (bool, error) {

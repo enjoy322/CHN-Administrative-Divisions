@@ -40,7 +40,8 @@ type Fail struct {
 	Village []Division
 }
 
-const CodeFailCrawlCity = 1
-const CodeFailCrawlCounty = 2
-const CodeFailCrawlTown = 3
-const CodeFailCrawlVillage = 4
+const CodeProvince = 1
+const CodeCity = 2
+const CodeCounty = 3
+const CodeTown = 4
+const CodeVillage = 5

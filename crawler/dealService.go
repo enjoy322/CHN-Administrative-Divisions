@@ -78,7 +78,7 @@ func DealProvince(doc *html.Node) []model.Division {
 				Url:        url,
 				SimpleCode: simpleCode,
 				Code:       code,
-				Level:      1,
+				Level:      model.CodeProvince,
 				Name:       provinceInfo.FirstChild.Data,
 				FullName:   provinceInfo.FirstChild.Data,
 			})
@@ -101,7 +101,8 @@ func DealCity(doc *html.Node, division model.Division) []model.Division {
 			Code:         code,
 			SimpleCode:   code[:4],
 			Name:         name,
-			Level:        2,
+			FullName:     division.Name + "/" + name,
+			Level:        model.CodeCity,
 			ProvinceCode: division.Code,
 		}
 		tempList = append(tempList, d)
@@ -115,20 +116,17 @@ func DealCounty(doc *html.Node, division model.Division) []model.Division {
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		if node.FirstChild.FirstChild.Data != "a" {
-			//市辖区（不再分
-			//fmt.Println("continue")
-			//continue
 			code := node.FirstChild.FirstChild.Data
 			name := node.LastChild.FirstChild.Data
 			var d = model.Division{
 				Code:         code,
 				SimpleCode:   code[:6],
 				Name:         name,
-				Level:        3,
+				FullName:     division.FullName + "/" + name,
+				Level:        model.CodeCounty,
 				CityCode:     division.Code,
 				ProvinceCode: division.ProvinceCode,
 			}
-			//ch <- d
 			data = append(data, d)
 
 		} else {
@@ -140,7 +138,8 @@ func DealCounty(doc *html.Node, division model.Division) []model.Division {
 				Code:         code,
 				SimpleCode:   code[:6],
 				Name:         name,
-				Level:        3,
+				FullName:     division.FullName + "/" + name,
+				Level:        model.CodeCounty,
 				CityCode:     division.Code,
 				ProvinceCode: division.ProvinceCode,
 			}
@@ -163,7 +162,8 @@ func DealTown(doc *html.Node, division model.Division) []model.Division {
 			Code:         code,
 			SimpleCode:   code[:9],
 			Name:         name,
-			Level:        4,
+			FullName:     division.FullName + "/" + name,
+			Level:        model.CodeTown,
 			CountyCode:   division.Code,
 			CityCode:     division.CityCode,
 			ProvinceCode: division.ProvinceCode,
@@ -186,8 +186,9 @@ func DealVillage(doc *html.Node, division model.Division) []model.Division {
 			Code:         code,
 			SimpleCode:   code,
 			Name:         name,
+			FullName:     division.FullName + "/" + name,
 			VillageType:  vType,
-			Level:        5,
+			Level:        model.CodeVillage,
 			TownCode:     division.Code,
 			CountyCode:   division.CountyCode,
 			CityCode:     division.CityCode,
