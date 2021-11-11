@@ -28,7 +28,7 @@ func Village() {
 		var failTimes = 0
 		for _, division := range townList {
 			//单线程
-			doc := CrawlVillage(BaseURL, Latest, division)
+			doc := CrawlVillage(service.BaseURL, Latest, division)
 			time.Sleep(time.Millisecond * 20)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 50)
@@ -90,7 +90,7 @@ func Village() {
 		var failTimes = 0
 		fmt.Println("needCrawlTown:", len(needCrawlTown))
 		for _, s := range needCrawlTown {
-			doc := CrawlVillage(BaseURL, Latest, s)
+			doc := CrawlVillage(service.BaseURL, Latest, s)
 			time.Sleep(time.Millisecond * 20)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 50)

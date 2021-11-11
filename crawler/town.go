@@ -24,7 +24,7 @@ func Town(fileName string) {
 		fmt.Println("//不存在 直接爬取 town")
 		for _, division := range upLevelList {
 			//单线程
-			doc := CrawlTown(BaseURL, Latest, division)
+			doc := CrawlTown(service.BaseURL, Latest, division)
 			time.Sleep(time.Millisecond * 100)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 500)
@@ -50,13 +50,15 @@ func Town(fileName string) {
 		fmt.Println("needCrawl:", len(needList))
 		var newCrawl int
 		for _, s := range needList {
-			fmt.Println(s)
-			doc := CrawlTown(BaseURL, Latest, s)
+			if !s.Branch {
+				continue
+			}
+			doc := CrawlTown(service.BaseURL, Latest, s)
 			time.Sleep(time.Millisecond * 100)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 500)
 				failTimes++
-				if failTimes > 5 {
+				if failTimes > 10 {
 					break
 				}
 				continue
@@ -76,5 +78,3 @@ func Town(fileName string) {
 	service.WriteToJsonFile(fileName, finalList)
 	fmt.Println("-----------------town----------------")
 }
-
-//排除

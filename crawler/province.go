@@ -15,7 +15,7 @@ func Province(fileName string) {
 	if !f {
 		fmt.Println("不存在")
 		//省份
-		doc := CrawlProvince(BaseURL, Latest)
+		doc := CrawlProvince(service.BaseURL, Latest)
 		if doc == nil {
 			fmt.Println("获取省份失败")
 			return

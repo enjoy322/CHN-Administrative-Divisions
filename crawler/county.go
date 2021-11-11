@@ -28,7 +28,7 @@ func County(fileName string) {
 		for _, division := range upLevelList {
 			//单线程
 			time.Sleep(time.Millisecond * 50)
-			doc := CrawlCounty(BaseURL, Latest, division)
+			doc := CrawlCounty(service.BaseURL, Latest, division)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 200)
 				failTimes++
@@ -55,7 +55,7 @@ func County(fileName string) {
 		//	[{441900000000 东莞市   441900000000 440000000000 2 true} {442000000000 中山市   442000000000 440000000000 2 true} {460400000000 儋州市   460400000000 460000000000 2 true}]
 		var newCrawl int
 		for _, s := range needList {
-			doc := CrawlCounty(BaseURL, Latest, s)
+			doc := CrawlCounty(service.BaseURL, Latest, s)
 			time.Sleep(time.Millisecond * 50)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 200)

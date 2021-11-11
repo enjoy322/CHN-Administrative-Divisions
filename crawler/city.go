@@ -26,7 +26,7 @@ func City(fileName string) {
 	if !f {
 		fmt.Println("不存在 直接爬取")
 		for _, division := range upLevelList {
-			doc := CrawlCity(BaseURL, Latest, division)
+			doc := CrawlCity(service.BaseURL, Latest, division)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 200)
 				failTimes++
@@ -52,7 +52,7 @@ func City(fileName string) {
 		fmt.Println("needCrawl:", len(needList))
 		var newCrawl int
 		for _, s := range needList {
-			doc := CrawlCity(BaseURL, Latest, s)
+			doc := CrawlCity(service.BaseURL, Latest, s)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 200)
 				failTimes++

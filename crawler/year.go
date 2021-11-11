@@ -12,7 +12,7 @@ var Latest = "2020"
 func Year() {
 	fileName := file.YearFile
 	//获取年份
-	yearHtml := CrawlYear(BaseURL)
+	yearHtml := CrawlYear(service.BaseURL)
 	if yearHtml == nil {
 		fmt.Println("获取年份失败")
 		return

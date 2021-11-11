@@ -37,6 +37,9 @@ func FindNeed(level int, upLevelList []model.Division, doneList []model.Division
 		}
 		for _, division := range upLevelList {
 			if _, ok := tempMap[division.CountyCode]; !ok {
+				if !division.Branch {
+					continue
+				}
 				needList = append(needList, division)
 			}
 		}

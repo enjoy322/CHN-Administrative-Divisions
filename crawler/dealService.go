@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"CHN-Administrative-Divisions/model"
+	"CHN-Administrative-Divisions/service"
 	"bytes"
 	"fmt"
 	"golang.org/x/net/html"
@@ -25,9 +26,9 @@ func DealYear(doc *html.Node) []model.DivisionYear {
 		updatedAt := nodesUpdatedAt[0].FirstChild.Data
 		l = append(l, model.DivisionYear{
 			YearStr:    year[:4] + "-01-01",
-			Year:       TimeStrToTime(year[:4] + "-01-01").Unix(),
+			Year:       service.TimeStrToTime(year[:4] + "-01-01").Unix(),
 			UpdatedStr: updatedAt,
-			UpdatedAt:  TimeStrToTime(updatedAt).Unix(),
+			UpdatedAt:  service.TimeStrToTime(updatedAt).Unix(),
 		})
 	}
 	return l
@@ -158,6 +159,7 @@ func DealTown(doc *html.Node, division model.Division) []model.Division {
 			Code:         code,
 			Name:         name,
 			Level:        model.CodeTown,
+			Branch:       true,
 			TownCode:     code,
 			CountyCode:   division.Code,
 			CityCode:     division.CityCode,
