@@ -1,44 +1,37 @@
 package service
 
-// 元素去重
-func RemoveRep(slc []int) []int {
-	if len(slc) < 1024 {
-		// 切片长度小于1024的时候，循环来过滤
-		return RemoveRepByLoop(slc)
-	} else {
-		// 大于的时候，通过map来过滤
-		return RemoveRepByMap(slc)
-	}
-}
+import "CHN-Administrative-Divisions/model"
 
-// 通过两重循环过滤重复元素
-func RemoveRepByLoop(slc []int) []int {
-	result := []int{} // 存放结果
-	for i := range slc {
-		flag := true
-		for j := range result {
-			if slc[i] == result[j] {
-				flag = false // 存在重复元素，标识为false
-				break
+func FindNeed(level int, upLevelList []model.Division, doneList []model.Division) (needList []model.Division) {
+	tempMap := map[string]int{} // 存放不重复主键
+	switch level {
+	case 1:
+		for _, division := range doneList {
+			if _, ok := tempMap[division.ProvinceCode]; !ok {
+				tempMap[division.ProvinceCode] = 1
 			}
 		}
-		if flag { // 标识为false，不添加进结果
-			result = append(result, slc[i])
+		for _, division := range upLevelList {
+			if _, ok := tempMap[division.ProvinceCode]; !ok {
+				needList = append(needList, division)
+			}
 		}
-	}
-	return result
-}
-
-// 通过map主键唯一的特性过滤重复元素
-func RemoveRepByMap(slc []int) []int {
-	result := []int{}
-	tempMap := map[int]byte{} // 存放不重复主键
-	for _, e := range slc {
-		l := len(tempMap)
-		tempMap[e] = 0
-		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-			result = append(result, e)
+		return
+	case 2:
+		for _, division := range doneList {
+			if _, ok := tempMap[division.CityCode]; !ok {
+				tempMap[division.CityCode] = 1
+			}
 		}
+		for _, division := range upLevelList {
+			if _, ok := tempMap[division.CityCode]; !ok {
+				needList = append(needList, division)
+			}
+		}
+		return
+	case 3:
+		return
+	default:
+		return
 	}
-	return result
 }
