@@ -75,13 +75,11 @@ func DealProvince(doc *html.Node) []model.Division {
 				code = b.String()
 			}
 			dList = append(dList, model.Division{
-				//Url:        url,
-				//SimpleCode: simpleCode,
+				Branch:       true,
 				Code:         code,
 				Level:        model.CodeProvince,
 				ProvinceCode: code,
 				Name:         provinceInfo.FirstChild.Data,
-				//FullName:   provinceInfo.FirstChild.Data,
 			})
 		}
 	}
@@ -101,6 +99,7 @@ func DealCity(doc *html.Node, division model.Division) []model.Division {
 			Code:         code,
 			Name:         name,
 			Level:        model.CodeCity,
+			Branch:       true,
 			ProvinceCode: division.Code,
 			CityCode:     code,
 		}
@@ -120,6 +119,7 @@ func DealCounty(doc *html.Node, division model.Division) []model.Division {
 			var d = model.Division{
 				Code:         code,
 				Name:         name,
+				Branch:       false,
 				Level:        model.CodeCounty,
 				CountyCode:   code,
 				CityCode:     division.Code,
@@ -135,6 +135,7 @@ func DealCounty(doc *html.Node, division model.Division) []model.Division {
 				Code:         code,
 				Name:         name,
 				Level:        model.CodeCounty,
+				Branch:       true,
 				CountyCode:   code,
 				CityCode:     division.Code,
 				ProvinceCode: division.ProvinceCode,

@@ -7,10 +7,10 @@ import (
 
 func main() {
 	//爬取省份
-	//crawler.Province()
+	//crawler.Province(file.ProvinceFile)
 	//crawler.City(file.CityFile)
 	crawler.County(file.CountyFile)
-	//crawler.Town()
+	//crawler.Town(file.TownFile)
 	//crawler.Village()
 
 }

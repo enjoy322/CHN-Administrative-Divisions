@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"CHN-Administrative-Divisions/model"
+	"fmt"
 	"golang.org/x/net/html"
 	"strings"
 )
@@ -58,7 +59,7 @@ func CrawlTown(url string, yearStr string, division model.Division) *html.Node {
 	builder.WriteString("/")
 	builder.WriteString(division.CountyCode[:6])
 	builder.WriteString(".html")
-	//fmt.Println(builder.String())
+	fmt.Println(builder.String())
 	//http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/11/01/110101.html
 	doc := crawl(builder.String())
 	return doc
@@ -86,6 +87,7 @@ func CrawlVillage(url string, yearStr string, division model.Division) *html.Nod
 func crawl(url string) *html.Node {
 	content, _, f := DoRequest(url)
 	if !f {
+		fmt.Println("crawl nil")
 		return nil
 	}
 

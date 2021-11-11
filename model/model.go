@@ -15,7 +15,8 @@ type Division struct {
 	CityCode     string
 	ProvinceCode string
 
-	Level uint8
+	Level  uint8
+	Branch bool
 }
 
 type DivisionTree struct {

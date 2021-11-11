@@ -1,14 +1,12 @@
 package crawler
 
 import (
-	"CHN-Administrative-Divisions/file"
 	"CHN-Administrative-Divisions/service"
 	"fmt"
 )
 
 // Province 爬取Province
-func Province() {
-	fileName := file.ProvinceFile
+func Province(fileName string) {
 	f, err := service.PathExists(fileName)
 	if err != nil {
 		fmt.Println(err.Error())

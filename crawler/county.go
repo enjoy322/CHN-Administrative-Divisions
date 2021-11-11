@@ -19,6 +19,9 @@ func County(fileName string) {
 	var finalList []model.Division
 	failTimes := 0
 
+	//todo
+	//地级市直到镇，街道
+
 	if !f {
 		//	不存在 直接爬取
 		fmt.Println("不存在 直接爬取")
@@ -48,6 +51,8 @@ func County(fileName string) {
 		//old去重
 		needList := service.FindNeed(model.CodeCity, upLevelList, finalList)
 		fmt.Println("needCrawl:", len(needList))
+		fmt.Println(needList)
+		//	[{441900000000 东莞市   441900000000 440000000000 2 true} {442000000000 中山市   442000000000 440000000000 2 true} {460400000000 儋州市   460400000000 460000000000 2 true}]
 		var newCrawl int
 		for _, s := range needList {
 			doc := CrawlCounty(BaseURL, Latest, s)
