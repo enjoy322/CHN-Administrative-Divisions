@@ -20,58 +20,44 @@ func City(fileName string) {
 	}
 
 	//错误10次结束本次爬取
-	var failTimes int
 	var finalList []model.Division
 
 	if !f {
 		fmt.Println("不存在 直接爬取")
-		for _, division := range upLevelList {
-			doc := CrawlCity(service.BaseURL, Latest, division)
-			if doc == nil {
-				time.Sleep(time.Millisecond * 200)
-				failTimes++
-				if failTimes > 10 {
-					break
-				}
-				continue
-			}
-			tempList := DealCity(doc, division)
-			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
-			for _, m := range tempList {
-				finalList = append(finalList, m)
-			}
-		}
+		finalList = crawlCity(upLevelList)
 	} else {
 		fmt.Println("检查未爬取")
 		// 读取文件中的数据,保存为map格式
 		service.Read(fileName, &finalList)
-
 		//需要爬取
 		needList := service.FindNeed(model.CodeProvince, upLevelList, finalList)
-
 		fmt.Println("needCrawl:", len(needList))
-		var newCrawl int
-		for _, s := range needList {
-			doc := CrawlCity(service.BaseURL, Latest, s)
-			if doc == nil {
-				time.Sleep(time.Millisecond * 200)
-				failTimes++
-				if failTimes > 10 {
-					break
-				}
-			}
-			tempList := DealCity(doc, s)
-			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
-			for _, m := range tempList {
-				finalList = append(finalList, m)
-				newCrawl++
-			}
-		}
-		//重新写入
-		fmt.Println("newCrawl:", newCrawl)
+		newList := crawlCity(needList)
+		fmt.Println("newCrawl:", len(newList))
+		finalList = append(finalList, newList...)
 	}
 	// 写入文件
 	fmt.Println("count:", len(finalList))
 	service.WriteToJsonFile(fileName, finalList)
 	fmt.Println("-----------------city----------------")
+}
+
+func crawlCity(crawlList []model.Division) (newList []model.Division) {
+	var failTimes int
+	for _, s := range crawlList {
+		doc := CrawlCity(service.BaseURL, Latest, s)
+		if doc == nil {
+			time.Sleep(time.Millisecond * 200)
+			failTimes++
+			if failTimes > 10 {
+				break
+			}
+		}
+		tempList := DealCity(doc, s)
+		fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
+		for _, m := range tempList {
+			newList = append(newList, m)
+		}
+	}
+	return
 }

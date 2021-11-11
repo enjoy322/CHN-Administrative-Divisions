@@ -8,7 +8,7 @@ import (
 )
 
 func CrawlYear(url string) *html.Node {
-	doc := crawl(url)
+	doc := crawlHtml(url)
 	return doc
 }
 
@@ -18,7 +18,7 @@ func CrawlProvince(url string, yearStr string) *html.Node {
 	builder.WriteString(url)
 	builder.WriteString(yearStr)
 	builder.WriteString("/")
-	doc := crawl(builder.String())
+	doc := crawlHtml(builder.String())
 	return doc
 }
 
@@ -30,7 +30,7 @@ func CrawlCity(url string, yearStr string, division model.Division) *html.Node {
 	builder.WriteString(division.Code[:2])
 	builder.WriteString(".html")
 	//http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/53.html
-	doc := crawl(builder.String())
+	doc := crawlHtml(builder.String())
 	return doc
 }
 
@@ -44,7 +44,7 @@ func CrawlCounty(url string, yearStr string, division model.Division) *html.Node
 	builder.WriteString(division.CityCode[:4])
 	builder.WriteString(".html")
 	//http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/53/5301.html
-	doc := crawl(builder.String())
+	doc := crawlHtml(builder.String())
 	return doc
 }
 
@@ -60,7 +60,7 @@ func CrawlTown(url string, yearStr string, division model.Division) *html.Node {
 	builder.WriteString(division.CountyCode[:6])
 	builder.WriteString(".html")
 	//http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/11/01/110101.html
-	doc := crawl(builder.String())
+	doc := crawlHtml(builder.String())
 	return doc
 }
 
@@ -78,12 +78,12 @@ func CrawlVillage(url string, yearStr string, division model.Division) *html.Nod
 	builder.WriteString(division.TownCode[:9])
 	builder.WriteString(".html")
 	//http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/11/01/01/110101001.html
-	doc := crawl(builder.String())
+	doc := crawlHtml(builder.String())
 	return doc
 }
 
 //爬取页面
-func crawl(url string) *html.Node {
+func crawlHtml(url string) *html.Node {
 	content, _, f := service.DoRequest(url)
 	if !f {
 		return nil
