@@ -30,6 +30,16 @@ func FindNeed(level int, upLevelList []model.Division, doneList []model.Division
 		}
 		return
 	case 3:
+		for _, division := range doneList {
+			if _, ok := tempMap[division.CountyCode]; !ok {
+				tempMap[division.CityCode] = 1
+			}
+		}
+		for _, division := range upLevelList {
+			if _, ok := tempMap[division.CountyCode]; !ok {
+				needList = append(needList, division)
+			}
+		}
 		return
 	default:
 		return

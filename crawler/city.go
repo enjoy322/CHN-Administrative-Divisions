@@ -4,6 +4,7 @@ import (
 	"CHN-Administrative-Divisions/model"
 	"CHN-Administrative-Divisions/service"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -35,6 +36,7 @@ func City(fileName string) {
 				continue
 			}
 			tempList := DealCity(doc, division)
+			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
 			for _, m := range tempList {
 				finalList = append(finalList, m)
 			}
@@ -59,6 +61,7 @@ func City(fileName string) {
 				}
 			}
 			tempList := DealCity(doc, s)
+			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
 			for _, m := range tempList {
 				finalList = append(finalList, m)
 				newCrawl++

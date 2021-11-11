@@ -4,6 +4,7 @@ import (
 	"CHN-Administrative-Divisions/model"
 	"CHN-Administrative-Divisions/service"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -16,11 +17,11 @@ func County(fileName string) {
 		fmt.Println(err.Error())
 	}
 	var finalList []model.Division
-	var failTimes int
+	failTimes := 0
 
 	if !f {
 		//	不存在 直接爬取
-		fmt.Println("//不存在 直接爬取 county")
+		fmt.Println("不存在 直接爬取")
 		for _, division := range upLevelList {
 			//单线程
 			time.Sleep(time.Millisecond * 50)
@@ -34,11 +35,10 @@ func County(fileName string) {
 				continue
 			}
 			tempList := DealCounty(doc, division)
-			fmt.Printf("---fail:---%d", failTimes)
+			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
 			for _, m := range tempList {
 				finalList = append(finalList, m)
 			}
-			break
 		}
 	} else {
 		fmt.Println("爬取未爬取的")
@@ -47,27 +47,27 @@ func County(fileName string) {
 		service.Read(fileName, &finalList)
 		//old去重
 		needList := service.FindNeed(model.CodeCity, upLevelList, finalList)
-		var new int
+		fmt.Println("needCrawl:", len(needList))
+		var newCrawl int
 		for _, s := range needList {
 			doc := CrawlCounty(BaseURL, Latest, s)
 			time.Sleep(time.Millisecond * 50)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 200)
 				failTimes++
-				if failTimes > 10 {
+				if failTimes > 5 {
 					break
 				}
 				continue
 			}
 			tempList := DealCounty(doc, s)
-			fmt.Printf("---fail:---%d\n", failTimes)
+			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
 			for _, m := range tempList {
 				finalList = append(finalList, m)
-				new++
+				newCrawl++
 			}
-			break
 		}
-		fmt.Println("new:", new)
+		fmt.Println("newCrawl:", newCrawl)
 	}
 	// 写入文件
 	fmt.Println("count:", len(finalList))

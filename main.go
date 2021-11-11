@@ -8,8 +8,8 @@ import (
 func main() {
 	//爬取省份
 	//crawler.Province()
-	crawler.City(file.CityFile)
-	//crawler.County(file.CountyFile)
+	//crawler.City(file.CityFile)
+	crawler.County(file.CountyFile)
 	//crawler.Town()
 	//crawler.Village()
 
