@@ -7,6 +7,17 @@ type DivisionYear struct {
 	UpdatedAt  int64
 }
 
+type DivisionVillage struct {
+	Code         string
+	Name         string
+	TownCode     string
+	CountyCode   string
+	CityCode     string
+	ProvinceCode string
+
+	Level uint8
+}
+
 type Division struct {
 	Code         string
 	Name         string

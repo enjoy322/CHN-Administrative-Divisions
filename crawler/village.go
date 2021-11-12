@@ -1,96 +1,30 @@
 package crawler
 
 import (
-	"CHN-Administrative-Divisions/file"
 	"CHN-Administrative-Divisions/model"
 	"CHN-Administrative-Divisions/service"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 )
 
-func Village() {
+func Village(fileName string) {
 	fmt.Println("-----------------village----------------")
 	//	获取上一级
-	fileName := file.VillageFile
-	townList := service.ListTown()
-	fmt.Println("town:", len(townList))
-
-	existsDivision, err := service.PathExists(fileName)
+	upLevelList := service.ListTown()
+	f, err := service.PathExists(fileName)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	if !existsDivision {
+	var finalList []model.Division
+	var failTimes = 0
+	if !f {
 		//	不存在 直接爬取
 		fmt.Println("//不存在 直接爬取 town获取village")
-		var finalList []model.Division
-		var failTimes = 0
-		for _, division := range townList {
+
+		for _, division := range upLevelList {
 			//单线程
 			doc := CrawlVillage(service.BaseURL, Latest, division)
-			time.Sleep(time.Millisecond * 20)
-			if doc == nil {
-				time.Sleep(time.Millisecond * 50)
-				failTimes++
-				if failTimes > 5 {
-					break
-				}
-				continue
-			}
-			tempList := DealVillage(doc, division)
-			fmt.Printf("---fail:---%d", failTimes)
-			for _, m := range tempList {
-				finalList = append(finalList, m)
-			}
-		}
-		fmt.Println(finalList)
-
-		//写入
-		dataJson, _ := json.Marshal(finalList)
-		fmt.Println("village:", len(finalList))
-		_ = ioutil.WriteFile(fileName, dataJson, 0755)
-
-	} else {
-		fmt.Println("检查并爬取")
-		//	需要爬取未爬取的
-		s1 := time.Now().UnixNano() / 1e6
-		var old []model.Division
-		// 读取文件中的数据
-		service.Read(fileName, &old)
-		//待爬取
-		//从保存的village中提取已经爬取得城镇
-		var needCrawlTown []model.Division
-		ss := time.Now().UnixNano() / 1e6
-		fmt.Println("读取json:", ss-s1, "ms")
-
-		//old去重
-		var result []model.Division
-		tempMap := map[string]model.Division{} // 存放不重复主键
-		for _, e := range old {
-			l := len(tempMap)
-			tempMap[e.TownCode] = e
-			if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-				result = append(result, e)
-			}
-		}
-		s3 := time.Now().UnixNano() / 1e6
-		fmt.Println("unique:", s3-ss, "ms")
-
-		fmt.Println("result:", len(result))
-		fmt.Println("old:", len(old))
-
-		for _, division := range townList {
-			if _, ok := tempMap[division.Code]; !ok {
-				needCrawlTown = append(needCrawlTown, division)
-			}
-		}
-		fmt.Println("need crawl deal cost:", time.Now().UnixNano()/1e6-ss, "ms")
-		var newList []model.Division
-		var failTimes = 0
-		fmt.Println("needCrawlTown:", len(needCrawlTown))
-		for _, s := range needCrawlTown {
-			doc := CrawlVillage(service.BaseURL, Latest, s)
 			time.Sleep(time.Millisecond * 20)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 50)
@@ -100,28 +34,43 @@ func Village() {
 				}
 				continue
 			}
-			tempList := DealVillage(doc, s)
-			fmt.Printf("---fail:---%d", failTimes)
+			tempList := DealVillage(doc, division)
+			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
 			for _, m := range tempList {
-				newList = append(newList, m)
+				finalList = append(finalList, m)
 			}
-			break
 		}
+	} else {
+		fmt.Println("检查并爬取")
+		// 读取文件中的数据
+		service.Read(fileName, &finalList)
+		//从保存的village中提取已经爬取得城镇
+		needList := service.FindNeed(model.CodeTown, upLevelList, finalList)
 
-		fmt.Println("old：", len(old))
-		//重新写入
-		if len(newList) > 0 {
-			//	新内容
-			fmt.Println("new：", len(newList))
-			for _, division := range newList {
-				old = append(old, division)
+		fmt.Println("needCrawl:", len(needList))
+		var newCrawl int
+		for _, s := range needList {
+			doc := CrawlVillage(service.BaseURL, Latest, s)
+			time.Sleep(time.Millisecond * 20)
+			if doc == nil {
+				time.Sleep(time.Millisecond * 50)
+				failTimes++
+				if failTimes > 50 {
+					break
+				}
+				continue
 			}
-			fmt.Println("total:", len(old))
+			tempList := DealVillage(doc, s)
+			fmt.Fprintf(os.Stdout, "---fail:---%d\r", failTimes)
+			for _, m := range tempList {
+				finalList = append(finalList, m)
+				newCrawl++
+			}
 		}
-
-		// 写入文件
-		out, _ := json.Marshal(old)
-		_ = ioutil.WriteFile(fileName, out, 0755)
+		fmt.Println("newCrawl：", newCrawl)
 	}
+	// 写入文件
+	fmt.Println("count:", len(finalList))
+	service.WriteToJsonFile(fileName, finalList)
 	fmt.Println("-----------------village----------------")
 }
