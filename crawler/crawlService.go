@@ -2,7 +2,7 @@ package crawler
 
 import (
 	"CHN-Administrative-Divisions/base"
-	"CHN-Administrative-Divisions/service"
+	"CHN-Administrative-Divisions/util"
 	"golang.org/x/net/html"
 	"strings"
 )
@@ -74,7 +74,7 @@ func CrawlVillage(url string, division base.Division) *html.Node {
 
 //爬取页面
 func crawlHtml(url string) *html.Node {
-	content, _, f := service.DoRequest(url)
+	content, _, f := util.DoRequest(url)
 	if !f {
 		return nil
 	}

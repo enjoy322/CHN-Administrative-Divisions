@@ -3,6 +3,7 @@ package crawler
 import (
 	"CHN-Administrative-Divisions/base"
 	"CHN-Administrative-Divisions/service"
+	"CHN-Administrative-Divisions/util"
 	"fmt"
 	"os"
 	"time"
@@ -12,7 +13,7 @@ func County(fileName string) {
 	fmt.Println("-----------------county----------------")
 	//	获取所有city
 	upLevelList := service.ListCity()
-	f, err := service.PathExists(fileName)
+	f, err := util.PathExists(fileName)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -47,9 +48,9 @@ func County(fileName string) {
 		fmt.Println("爬取未爬取的")
 		//	需要爬取未爬取的
 		// 读取文件
-		service.Read(fileName, &finalList)
+		util.Read(fileName, &finalList)
 		//old去重
-		needList := service.FindNeed(base.CodeCity, upLevelList, finalList)
+		needList := util.FindNeed(base.CodeCity, upLevelList, finalList)
 		fmt.Println("needCrawl:", len(needList))
 		fmt.Println(needList)
 		//	[{441900000000 东莞市   441900000000 440000000000 2 true} {442000000000 中山市   442000000000 440000000000 2 true} {460400000000 儋州市   460400000000 460000000000 2 true}]
@@ -76,6 +77,6 @@ func County(fileName string) {
 	}
 	// 写入文件
 	fmt.Println("count:", len(finalList))
-	service.WriteToJsonFile(fileName, finalList)
+	util.WriteToJsonFile(fileName, finalList)
 	fmt.Println("-----------------county----------------")
 }

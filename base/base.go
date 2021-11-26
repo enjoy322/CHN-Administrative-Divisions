@@ -10,13 +10,6 @@ const CodeCounty = 3
 const CodeTown = 4
 const CodeVillage = 5
 
-type DivisionYear struct {
-	Year       int64
-	YearStr    string
-	UpdatedStr string
-	UpdatedAt  int64
-}
-
 type DivisionVillage struct {
 	Code         string
 	Name         string

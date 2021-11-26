@@ -3,6 +3,7 @@ package crawler
 import (
 	"CHN-Administrative-Divisions/base"
 	"CHN-Administrative-Divisions/service"
+	"CHN-Administrative-Divisions/util"
 	"fmt"
 	"os"
 	"time"
@@ -12,7 +13,7 @@ func Village(fileName string) {
 	fmt.Println("-----------------village----------------")
 	//	获取上一级
 	upLevelList := service.ListTown()
-	f, err := service.PathExists(fileName)
+	f, err := util.PathExists(fileName)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -43,9 +44,9 @@ func Village(fileName string) {
 	} else {
 		fmt.Println("检查并爬取")
 		// 读取文件中的数据
-		service.Read(fileName, &finalList)
+		util.Read(fileName, &finalList)
 		//从保存的village中提取已经爬取得城镇
-		needList := service.FindNeed(base.CodeTown, upLevelList, finalList)
+		needList := util.FindNeed(base.CodeTown, upLevelList, finalList)
 
 		fmt.Println("needCrawl:", len(needList))
 		var newCrawl int
@@ -71,6 +72,6 @@ func Village(fileName string) {
 	}
 	// 写入文件
 	fmt.Println("count:", len(finalList))
-	service.WriteToJsonFile(fileName, finalList)
+	util.WriteToJsonFile(fileName, finalList)
 	fmt.Println("-----------------village----------------")
 }

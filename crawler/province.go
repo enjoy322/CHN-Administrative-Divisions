@@ -2,14 +2,14 @@ package crawler
 
 import (
 	"CHN-Administrative-Divisions/base"
-	"CHN-Administrative-Divisions/service"
+	"CHN-Administrative-Divisions/util"
 	"fmt"
 	"log"
 )
 
 // Province 爬取Province
 func Province(fileName string) {
-	f, err := service.PathExists(fileName)
+	f, err := util.PathExists(fileName)
 	if err != nil {
 		log.Println(err)
 		return
@@ -24,6 +24,6 @@ func Province(fileName string) {
 		}
 		provinceList := DealProvince(doc)
 		// 写入文件
-		service.WriteToJsonFile(fileName, provinceList)
+		util.WriteToJsonFile(fileName, provinceList)
 	}
 }

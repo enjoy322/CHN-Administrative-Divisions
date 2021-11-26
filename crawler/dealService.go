@@ -2,18 +2,20 @@ package crawler
 
 import (
 	"CHN-Administrative-Divisions/base"
+	"CHN-Administrative-Divisions/util"
 	"bytes"
 	"fmt"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 	"io"
+	"log"
 	"strings"
 )
 
-//省份
+// DealProvince 省份
 func DealProvince(doc *html.Node) []base.Division {
 	var dList []base.Division
-	matcherCity := matchByClass("class", "provincetr")
+	matcherCity := util.MatchByClass("class", "provincetr")
 	nodes := TraverseNode(doc, matcherCity)
 	for _, node := range nodes {
 		//获取每个省份的超链接信息
@@ -22,7 +24,7 @@ func DealProvince(doc *html.Node) []base.Division {
 			fmt.Println(err2)
 			return nil
 		}
-		matcherPerProvince := matcherByAtom(atom.A)
+		matcherPerProvince := util.MatcherByAtom(atom.A)
 		nodesByA := TraverseNode(docPer, matcherPerProvince)
 		for _, provinceInfo := range nodesByA {
 			url := provinceInfo.Attr[0].Val
@@ -48,10 +50,10 @@ func DealProvince(doc *html.Node) []base.Division {
 	return dList
 }
 
-//地级市
+// DealCity 地级市
 func DealCity(doc *html.Node, division base.Division) []base.Division {
 	var tempList []base.Division
-	matcher := matchByClass("class", "citytr")
+	matcher := util.MatchByClass("class", "citytr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
@@ -72,7 +74,7 @@ func DealCity(doc *html.Node, division base.Division) []base.Division {
 
 func DealCounty(doc *html.Node, division base.Division) []base.Division {
 	var data []base.Division
-	matcher := matchByClass("class", "countytr")
+	matcher := util.MatchByClass("class", "countytr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		if node.FirstChild.FirstChild.Data != "a" {
@@ -110,7 +112,7 @@ func DealCounty(doc *html.Node, division base.Division) []base.Division {
 
 func DealTown(doc *html.Node, division base.Division) []base.Division {
 	var data []base.Division
-	matcher := matchByClass("class", "towntr")
+	matcher := util.MatchByClass("class", "towntr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
@@ -133,7 +135,7 @@ func DealTown(doc *html.Node, division base.Division) []base.Division {
 
 func DealVillage(doc *html.Node, division base.Division) []base.Division {
 	var data []base.Division
-	matcher := matchByClass("class", "villagetr")
+	matcher := util.MatchByClass("class", "villagetr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		code := node.FirstChild.FirstChild.Data
@@ -176,6 +178,10 @@ func TraverseNode(doc *html.Node, matcher func(node *html.Node) (bool, bool)) (n
 func renderNode(n *html.Node) string {
 	var buf bytes.Buffer
 	w := io.Writer(&buf)
-	html.Render(w, n)
+	err := html.Render(w, n)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
 	return buf.String()
 }
