@@ -1,31 +1,24 @@
 package crawler
 
 import (
-	"CHN-Administrative-Divisions/model"
+	"CHN-Administrative-Divisions/base"
 	"CHN-Administrative-Divisions/service"
 	"golang.org/x/net/html"
 	"strings"
 )
 
-func CrawlYear(url string) *html.Node {
-	doc := crawlHtml(url)
-	return doc
-}
-
 //省份
-func CrawlProvince(url string, yearStr string) *html.Node {
+func CrawlProvince(url string) *html.Node {
 	builder := strings.Builder{}
 	builder.WriteString(url)
-	builder.WriteString(yearStr)
 	builder.WriteString("/")
 	doc := crawlHtml(builder.String())
 	return doc
 }
 
-func CrawlCity(url string, yearStr string, division model.Division) *html.Node {
+func CrawlCity(url string, division base.Division) *html.Node {
 	builder := strings.Builder{}
 	builder.WriteString(url)
-	builder.WriteString(yearStr)
 	builder.WriteString("/")
 	builder.WriteString(division.Code[:2])
 	builder.WriteString(".html")
@@ -34,10 +27,9 @@ func CrawlCity(url string, yearStr string, division model.Division) *html.Node {
 	return doc
 }
 
-func CrawlCounty(url string, yearStr string, division model.Division) *html.Node {
+func CrawlCounty(url string, division base.Division) *html.Node {
 	builder := strings.Builder{}
 	builder.WriteString(url)
-	builder.WriteString(yearStr)
 	builder.WriteString("/")
 	builder.WriteString(division.ProvinceCode[:2])
 	builder.WriteString("/")
@@ -48,10 +40,9 @@ func CrawlCounty(url string, yearStr string, division model.Division) *html.Node
 	return doc
 }
 
-func CrawlTown(url string, yearStr string, division model.Division) *html.Node {
+func CrawlTown(url string, division base.Division) *html.Node {
 	builder := strings.Builder{}
 	builder.WriteString(url)
-	builder.WriteString(yearStr)
 	builder.WriteString("/")
 	builder.WriteString(division.ProvinceCode[:2])
 	builder.WriteString("/")
@@ -64,10 +55,9 @@ func CrawlTown(url string, yearStr string, division model.Division) *html.Node {
 	return doc
 }
 
-func CrawlVillage(url string, yearStr string, division model.Division) *html.Node {
+func CrawlVillage(url string, division base.Division) *html.Node {
 	builder := strings.Builder{}
 	builder.WriteString(url)
-	builder.WriteString(yearStr)
 	builder.WriteString("/")
 	builder.WriteString(division.ProvinceCode[:2])
 	builder.WriteString("/")

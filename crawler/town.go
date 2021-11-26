@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"CHN-Administrative-Divisions/model"
+	"CHN-Administrative-Divisions/base"
 	"CHN-Administrative-Divisions/service"
 	"fmt"
 	"os"
@@ -16,7 +16,7 @@ func Town(fileName string) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	var finalList []model.Division
+	var finalList []base.Division
 	var failTimes = 0
 
 	if !f {
@@ -24,7 +24,7 @@ func Town(fileName string) {
 		fmt.Println("//不存在 直接爬取 town")
 		for _, division := range upLevelList {
 			//单线程
-			doc := CrawlTown(service.BaseURL, Latest, division)
+			doc := CrawlTown(base.URL, division)
 			time.Sleep(time.Millisecond * 100)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 500)
@@ -46,14 +46,14 @@ func Town(fileName string) {
 		// 读取文件
 		service.Read(fileName, &finalList)
 		fmt.Println("doneList:", len(finalList))
-		needList := service.FindNeed(model.CodeCounty, upLevelList, finalList)
+		needList := service.FindNeed(base.CodeCounty, upLevelList, finalList)
 		fmt.Println("needCrawl:", len(needList))
 		var newCrawl int
 		for _, s := range needList {
 			if !s.Branch {
 				continue
 			}
-			doc := CrawlTown(service.BaseURL, Latest, s)
+			doc := CrawlTown(base.URL, s)
 			time.Sleep(time.Millisecond * 100)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 500)

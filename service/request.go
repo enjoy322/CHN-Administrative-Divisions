@@ -9,8 +9,6 @@ import (
 	"net/http"
 )
 
-const BaseURL = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/"
-
 func DoRequest(url string) (io.Reader, error, bool) {
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", url, nil)

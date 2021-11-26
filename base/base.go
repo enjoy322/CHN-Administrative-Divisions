@@ -1,4 +1,14 @@
-package model
+package base
+
+const URL = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020"
+
+//level
+
+const CodeProvince = 1
+const CodeCity = 2
+const CodeCounty = 3
+const CodeTown = 4
+const CodeVillage = 5
 
 type DivisionYear struct {
 	Year       int64
@@ -42,18 +52,12 @@ type DivisionTree struct {
 	Children []Division
 }
 
-type Version struct {
-	CreateAt    int
-	CreateAtStr string
-	URL         string
-	Version     int
-	VersionStr  string
-	Year        int
-	YearStr     string
-}
+const FileDir = "./file"
 
-const CodeProvince = 1
-const CodeCity = 2
-const CodeCounty = 3
-const CodeTown = 4
-const CodeVillage = 5
+var (
+	ProvinceFile = FileDir + "/province.json"
+	CityFile     = FileDir + "/city.json"
+	CountyFile   = FileDir + "/county.json"
+	TownFile     = FileDir + "/town.json"
+	VillageFile  = FileDir + "/village.json"
+)

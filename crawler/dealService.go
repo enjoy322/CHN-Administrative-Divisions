@@ -1,8 +1,7 @@
 package crawler
 
 import (
-	"CHN-Administrative-Divisions/model"
-	"CHN-Administrative-Divisions/service"
+	"CHN-Administrative-Divisions/base"
 	"bytes"
 	"fmt"
 	"golang.org/x/net/html"
@@ -11,47 +10,9 @@ import (
 	"strings"
 )
 
-//返回统计局提供的年份信息
-func DealYear(doc *html.Node) []model.DivisionYear {
-	var l []model.DivisionYear
-	matcherCity := matchByClass("class", "cont_tit")
-	nodes := TraverseNode(doc, matcherCity)
-	for _, node := range nodes {
-		docContent, _ := html.Parse(strings.NewReader(renderNode(node)))
-		matcherYear := matchByClass("class", "cont_tit03")
-		matcherUpdatedAt := matchByClass("class", "cont_tit02")
-		nodesYear := TraverseNode(docContent, matcherYear)
-		nodesUpdatedAt := TraverseNode(docContent, matcherUpdatedAt)
-		year := nodesYear[0].FirstChild.Data
-		updatedAt := nodesUpdatedAt[0].FirstChild.Data
-		l = append(l, model.DivisionYear{
-			YearStr:    year[:4] + "-01-01",
-			Year:       service.TimeStrToTime(year[:4] + "-01-01").Unix(),
-			UpdatedStr: updatedAt,
-			UpdatedAt:  service.TimeStrToTime(updatedAt).Unix(),
-		})
-	}
-	return l
-}
-
-//版本信息 写入
-
-func WriteVersion() {
-	//version := map[string]interface{}{
-	//	"URL":         baseURL,
-	//	"CreateAt":    BeijingTime().Unix(),
-	//	"CreateAtStr": BeijingTime().Format("2006-01-02T15-04-05+08:00"),
-	//	"Year":        TimeStrToTime().Unix(),
-	//	"YearStr":     latestYear.Year,
-	//	"Version":     latestYear.UpdatedAt,
-	//	"VersionStr":  StampToTime(latestYear.UpdatedAt).Format("2006-01-02T15-04-05+08:00"),
-	//}
-	//WriteToJsonFile(dir, "version.json", version)
-}
-
-////省份
-func DealProvince(doc *html.Node) []model.Division {
-	var dList []model.Division
+//省份
+func DealProvince(doc *html.Node) []base.Division {
+	var dList []base.Division
 	matcherCity := matchByClass("class", "provincetr")
 	nodes := TraverseNode(doc, matcherCity)
 	for _, node := range nodes {
@@ -75,10 +36,10 @@ func DealProvince(doc *html.Node) []model.Division {
 				}
 				code = b.String()
 			}
-			dList = append(dList, model.Division{
+			dList = append(dList, base.Division{
 				Branch:       true,
 				Code:         code,
-				Level:        model.CodeProvince,
+				Level:        base.CodeProvince,
 				ProvinceCode: code,
 				Name:         provinceInfo.FirstChild.Data,
 			})
@@ -88,18 +49,18 @@ func DealProvince(doc *html.Node) []model.Division {
 }
 
 //地级市
-func DealCity(doc *html.Node, division model.Division) []model.Division {
-	var tempList []model.Division
+func DealCity(doc *html.Node, division base.Division) []base.Division {
+	var tempList []base.Division
 	matcher := matchByClass("class", "citytr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
 		code := node.FirstChild.FirstChild.FirstChild.Data
 		name := node.LastChild.FirstChild.FirstChild.Data
-		var d = model.Division{
+		var d = base.Division{
 			Code:         code,
 			Name:         name,
-			Level:        model.CodeCity,
+			Level:        base.CodeCity,
 			Branch:       true,
 			ProvinceCode: division.Code,
 			CityCode:     code,
@@ -109,19 +70,19 @@ func DealCity(doc *html.Node, division model.Division) []model.Division {
 	return tempList
 }
 
-func DealCounty(doc *html.Node, division model.Division) []model.Division {
-	var data []model.Division
+func DealCounty(doc *html.Node, division base.Division) []base.Division {
+	var data []base.Division
 	matcher := matchByClass("class", "countytr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		if node.FirstChild.FirstChild.Data != "a" {
 			code := node.FirstChild.FirstChild.Data
 			name := node.LastChild.FirstChild.Data
-			var d = model.Division{
+			var d = base.Division{
 				Code:         code,
 				Name:         name,
 				Branch:       false,
-				Level:        model.CodeCounty,
+				Level:        base.CodeCounty,
 				CountyCode:   code,
 				CityCode:     division.Code,
 				ProvinceCode: division.ProvinceCode,
@@ -132,10 +93,10 @@ func DealCounty(doc *html.Node, division model.Division) []model.Division {
 			//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
 			code := node.FirstChild.FirstChild.FirstChild.Data
 			name := node.LastChild.FirstChild.FirstChild.Data
-			var d = model.Division{
+			var d = base.Division{
 				Code:         code,
 				Name:         name,
-				Level:        model.CodeCounty,
+				Level:        base.CodeCounty,
 				Branch:       true,
 				CountyCode:   code,
 				CityCode:     division.Code,
@@ -147,18 +108,18 @@ func DealCounty(doc *html.Node, division model.Division) []model.Division {
 	return data
 }
 
-func DealTown(doc *html.Node, division model.Division) []model.Division {
-	var data []model.Division
+func DealTown(doc *html.Node, division base.Division) []base.Division {
+	var data []base.Division
 	matcher := matchByClass("class", "towntr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		//tempUrl := node.FirstChild.FirstChild.Attr[0].Val
 		code := node.FirstChild.FirstChild.FirstChild.Data
 		name := node.LastChild.FirstChild.FirstChild.Data
-		var d = model.Division{
+		var d = base.Division{
 			Code:         code,
 			Name:         name,
-			Level:        model.CodeTown,
+			Level:        base.CodeTown,
 			Branch:       true,
 			TownCode:     code,
 			CountyCode:   division.Code,
@@ -170,18 +131,18 @@ func DealTown(doc *html.Node, division model.Division) []model.Division {
 	return data
 }
 
-func DealVillage(doc *html.Node, division model.Division) []model.Division {
-	var data []model.Division
+func DealVillage(doc *html.Node, division base.Division) []base.Division {
+	var data []base.Division
 	matcher := matchByClass("class", "villagetr")
 	nodes := TraverseNode(doc, matcher)
 	for _, node := range nodes {
 		code := node.FirstChild.FirstChild.Data
 		//vType := node.FirstChild.NextSibling.FirstChild.Data
 		name := node.LastChild.FirstChild.Data
-		var d = model.Division{
+		var d = base.Division{
 			Code:         code,
 			Name:         name,
-			Level:        model.CodeVillage,
+			Level:        base.CodeVillage,
 			TownCode:     division.Code,
 			CountyCode:   division.CountyCode,
 			CityCode:     division.CityCode,

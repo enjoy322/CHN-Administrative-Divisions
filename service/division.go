@@ -1,54 +1,53 @@
 package service
 
 import (
-	"CHN-Administrative-Divisions/file"
-	"CHN-Administrative-Divisions/model"
+	"CHN-Administrative-Divisions/base"
 	"fmt"
 )
 
 //省份List
 
-func ListProvince() []model.Division {
-	var data []model.Division
+func ListProvince() []base.Division {
+	var data []base.Division
 
-	Read(file.ProvinceFile, &data)
+	Read(base.ProvinceFile, &data)
 	return data
 }
 
-func ListCity() []model.Division {
-	var data []model.Division
+func ListCity() []base.Division {
+	var data []base.Division
 
-	Read(file.CityFile, &data)
+	Read(base.CityFile, &data)
 	return data
 }
 
-func ListCounty() []model.Division {
-	var data []model.Division
+func ListCounty() []base.Division {
+	var data []base.Division
 
-	Read(file.CountyFile, &data)
+	Read(base.CountyFile, &data)
 	return data
 }
 
-func ListTown() []model.Division {
-	var data []model.Division
+func ListTown() []base.Division {
+	var data []base.Division
 
-	Read(file.TownFile, &data)
+	Read(base.TownFile, &data)
 	return data
 }
 
-func ListVillage() []model.Division {
-	var data []model.Division
+func ListVillage() []base.Division {
+	var data []base.Division
 
-	Read(file.VillageFile, &data)
+	Read(base.VillageFile, &data)
 	return data
 }
 
 func GetUp(code string, level int) {
 
-	var d model.Division
+	var d base.Division
 
 	switch level {
-	case model.CodeProvince:
+	case base.CodeProvince:
 		p := GetProvince(d.ProvinceCode)
 		fmt.Println(p)
 
@@ -75,7 +74,7 @@ func Get(code string) {
 	}
 }
 
-func GetProvince(code string) *model.Division {
+func GetProvince(code string) *base.Division {
 	data := ListProvince()
 
 	for _, datum := range data {

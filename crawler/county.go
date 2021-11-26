@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"CHN-Administrative-Divisions/model"
+	"CHN-Administrative-Divisions/base"
 	"CHN-Administrative-Divisions/service"
 	"fmt"
 	"os"
@@ -16,7 +16,7 @@ func County(fileName string) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	var finalList []model.Division
+	var finalList []base.Division
 	failTimes := 0
 
 	//todo
@@ -28,7 +28,7 @@ func County(fileName string) {
 		for _, division := range upLevelList {
 			//单线程
 			time.Sleep(time.Millisecond * 50)
-			doc := CrawlCounty(service.BaseURL, Latest, division)
+			doc := CrawlCounty(base.URL, division)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 200)
 				failTimes++
@@ -49,13 +49,13 @@ func County(fileName string) {
 		// 读取文件
 		service.Read(fileName, &finalList)
 		//old去重
-		needList := service.FindNeed(model.CodeCity, upLevelList, finalList)
+		needList := service.FindNeed(base.CodeCity, upLevelList, finalList)
 		fmt.Println("needCrawl:", len(needList))
 		fmt.Println(needList)
 		//	[{441900000000 东莞市   441900000000 440000000000 2 true} {442000000000 中山市   442000000000 440000000000 2 true} {460400000000 儋州市   460400000000 460000000000 2 true}]
 		var newCrawl int
 		for _, s := range needList {
-			doc := CrawlCounty(service.BaseURL, Latest, s)
+			doc := CrawlCounty(base.URL, s)
 			time.Sleep(time.Millisecond * 50)
 			if doc == nil {
 				time.Sleep(time.Millisecond * 200)

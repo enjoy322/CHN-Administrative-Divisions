@@ -1,8 +1,10 @@
 package service
 
-import "CHN-Administrative-Divisions/model"
+import (
+	"CHN-Administrative-Divisions/base"
+)
 
-func FindNeed(level int, upLevelList []model.Division, doneList []model.Division) (needList []model.Division) {
+func FindNeed(level int, upLevelList []base.Division, doneList []base.Division) (needList []base.Division) {
 	tempMap := map[string]int{} // 存放不重复主键
 	switch level {
 	case 1:

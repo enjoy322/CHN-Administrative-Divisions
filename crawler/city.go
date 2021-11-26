@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"CHN-Administrative-Divisions/model"
+	"CHN-Administrative-Divisions/base"
 	"CHN-Administrative-Divisions/service"
 	"fmt"
 	"os"
@@ -20,7 +20,7 @@ func City(fileName string) {
 	}
 
 	//错误10次结束本次爬取
-	var finalList []model.Division
+	var finalList []base.Division
 
 	if !f {
 		fmt.Println("不存在 直接爬取")
@@ -30,7 +30,7 @@ func City(fileName string) {
 		// 读取文件中的数据,保存为map格式
 		service.Read(fileName, &finalList)
 		//需要爬取
-		needList := service.FindNeed(model.CodeProvince, upLevelList, finalList)
+		needList := service.FindNeed(base.CodeProvince, upLevelList, finalList)
 		fmt.Println("needCrawl:", len(needList))
 		newList := crawlCity(needList)
 		fmt.Println("newCrawl:", len(newList))
@@ -42,10 +42,10 @@ func City(fileName string) {
 	fmt.Println("-----------------city----------------")
 }
 
-func crawlCity(crawlList []model.Division) (newList []model.Division) {
+func crawlCity(crawlList []base.Division) (newList []base.Division) {
 	var failTimes int
 	for _, s := range crawlList {
-		doc := CrawlCity(service.BaseURL, Latest, s)
+		doc := CrawlCity(base.URL, s)
 		if doc == nil {
 			time.Sleep(time.Millisecond * 200)
 			failTimes++
