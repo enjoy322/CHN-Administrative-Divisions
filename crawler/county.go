@@ -2,7 +2,7 @@ package crawler
 
 import (
 	"CHN-Administrative-Divisions/base"
-	"CHN-Administrative-Divisions/service"
+	"CHN-Administrative-Divisions/query"
 	"CHN-Administrative-Divisions/util"
 	"fmt"
 	"os"
@@ -12,7 +12,7 @@ import (
 func County(fileName string) {
 	fmt.Println("-----------------county----------------")
 	//	获取所有city
-	upLevelList := service.ListCity()
+	upLevelList := query.ListCity()
 	f, err := util.PathExists(fileName)
 	if err != nil {
 		fmt.Println(err.Error())

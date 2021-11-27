@@ -1,20 +1,11 @@
-package service
+package query
 
 import (
 	"CHN-Administrative-Divisions/base"
 )
 
-type method interface {
-	GetByCode(code string) (data base.Division)
-	ListBelongingsByCode(code string) (data []base.Division)
-	GetUpLevelDivisionByCode(code string) (data base.Division, f bool)
-	ListByName(name string) []base.Division
-}
-
-type Service struct {
-}
-
-func (s Service) GetByCode(code string) (data base.Division) {
+// GetByCode 根据行政区划Code查询唯一行政区划信息
+func GetByCode(code string) (data base.Division) {
 	switch level(code) {
 	case base.CodeProvince:
 		data = GetProvinceByCode(code)
@@ -34,7 +25,8 @@ func (s Service) GetByCode(code string) (data base.Division) {
 	return
 }
 
-func (s Service) ListBelongingsByCode(code string) (data []base.Division) {
+// ListBelongingsByCode 查询某行政区划的下一级所有行政区划信息
+func ListBelongingsByCode(code string) (data []base.Division) {
 	levelInt := level(code)
 	switch levelInt {
 	case base.CodeProvince:
@@ -77,7 +69,8 @@ func (s Service) ListBelongingsByCode(code string) (data []base.Division) {
 	return
 }
 
-func (s Service) GetUpLevelDivisionByCode(code string) (data base.Division, f bool) {
+// GetUpLevelDivisionByCode 查询某行政区划的上一级行政区划
+func GetUpLevelDivisionByCode(code string) (data base.Division, f bool) {
 	levelInt := level(code)
 	switch levelInt {
 	case base.CodeProvince:
@@ -104,7 +97,8 @@ func (s Service) GetUpLevelDivisionByCode(code string) (data base.Division, f bo
 	return
 }
 
-func (s Service) ListByName(name string) map[int][]base.Division {
+// ListByName 根据名称模糊查询
+func ListByName(name string) map[int][]base.Division {
 	data := make(map[int][]base.Division)
 	dataProvince := ListProvinceByName(name)
 	dataCity := ListCityByName(name)

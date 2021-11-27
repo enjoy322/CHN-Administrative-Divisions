@@ -1,4 +1,4 @@
-package service
+package query
 
 import (
 	"CHN-Administrative-Divisions/base"
@@ -6,11 +6,13 @@ import (
 	"strings"
 )
 
+// ListProvince 查询所有省级行政区划信息
 func ListProvince() (data []base.Division) {
 	util.Read(base.ProvinceFile, &data)
 	return
 }
 
+// GetProvinceByCode 根据Code查询省级行政区划信息
 func GetProvinceByCode(code string) base.Division {
 	data := ListProvince()
 	for _, datum := range data {
@@ -21,6 +23,7 @@ func GetProvinceByCode(code string) base.Division {
 	return base.Division{}
 }
 
+// ListProvinceByName 根据名称模糊查询省级行政区划信息
 func ListProvinceByName(name string) []base.Division {
 	var list []base.Division
 	data := ListProvince()
