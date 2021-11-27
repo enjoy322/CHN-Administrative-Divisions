@@ -18,6 +18,6 @@ func main() {
 	fmt.Println(service.Service{}.ListBelongingsByCode("532600000000"))
 	fmt.Println(service.Service{}.ListBelongingsByCode("532601001000"))
 	fmt.Println(service.Service{}.ListBelongingsByCode("532601001001"))
-	fmt.Println(service.Service{}.ListByName("南"))
+	fmt.Println(service.Service{}.ListByName("昆明"))
 
 }

@@ -104,19 +104,19 @@ func (s Service) GetUpLevelDivisionByCode(code string) (data base.Division, f bo
 	return
 }
 
-func (s Service) ListByName(name string) []base.Division {
-	var list []base.Division
+func (s Service) ListByName(name string) map[int][]base.Division {
+	data := make(map[int][]base.Division)
 	dataProvince := ListProvinceByName(name)
 	dataCity := ListCityByName(name)
 	dataCounty := ListCountyByName(name)
 	dataTown := ListTownByName(name)
 	dataVillage := ListVillageByName(name)
-	list = append(list, dataProvince...)
-	list = append(list, dataCity...)
-	list = append(list, dataCounty...)
-	list = append(list, dataTown...)
-	list = append(list, dataVillage...)
-	return list
+	data[base.CodeProvince] = dataProvince
+	data[base.CodeCity] = dataCity
+	data[base.CodeCounty] = dataCounty
+	data[base.CodeTown] = dataTown
+	data[base.CodeVillage] = dataVillage
+	return data
 }
 
 func level(code string) int {
