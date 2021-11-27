@@ -2,10 +2,6 @@
 
 #### 获取方式
 
-```shell
-go get github.com/enjoy322/CHN-Administrative-Divisions
-```
-
 #### 功能
 
 ##### 01 爬取中国行政区划信息
