@@ -8,6 +8,7 @@ type method interface {
 	GetByCode(code string) (data base.Division)
 	ListBelongingsByCode(code string) (data []base.Division)
 	GetUpLevelDivisionByCode(code string) (data base.Division, f bool)
+	ListByName(name string) []base.Division
 }
 
 type Service struct {
@@ -101,6 +102,21 @@ func (s Service) GetUpLevelDivisionByCode(code string) (data base.Division, f bo
 		panic("err")
 	}
 	return
+}
+
+func (s Service) ListByName(name string) []base.Division {
+	var list []base.Division
+	dataProvince := ListProvinceByName(name)
+	dataCity := ListCityByName(name)
+	dataCounty := ListCountyByName(name)
+	dataTown := ListTownByName(name)
+	dataVillage := ListVillageByName(name)
+	list = append(list, dataProvince...)
+	list = append(list, dataCity...)
+	list = append(list, dataCounty...)
+	list = append(list, dataTown...)
+	list = append(list, dataVillage...)
+	return list
 }
 
 func level(code string) int {
