@@ -15,7 +15,7 @@ func County(fileName string) {
 	upLevelList := query.ListCity()
 	f, err := util.PathExists(fileName)
 	if err != nil {
-		fmt.Println(err.Error())
+		panic(err.Error())
 	}
 	var finalList []base.Division
 	failTimes := 0

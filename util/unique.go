@@ -4,6 +4,7 @@ import (
 	"CHN-Administrative-Divisions/base"
 )
 
+// FindNeed 查询仍需要爬取的
 func FindNeed(level int, upLevelList []base.Division, doneList []base.Division) (needList []base.Division) {
 	tempMap := map[string]int{} // 存放不重复主键
 	switch level {
