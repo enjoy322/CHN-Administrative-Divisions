@@ -54,3 +54,10 @@ var (
 	TownFile     = FileDir + "/town.json"
 	VillageFile  = FileDir + "/village.json"
 )
+var File = map[string]string{
+	"province": ProvinceFile,
+	"city":     CityFile,
+	"county":   CountyFile,
+	"town":     TownFile,
+	"village":  VillageFile,
+}
