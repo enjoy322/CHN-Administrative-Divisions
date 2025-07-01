@@ -1,7 +1,5 @@
 # CHN-Administrative-Divisions
 
-## 重要：放弃更新
-
 #### 获取方式
 
 #### 功能
